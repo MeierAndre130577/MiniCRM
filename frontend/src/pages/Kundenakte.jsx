@@ -391,11 +391,11 @@ function StammdatenTab({ kunde, saveAll }) {
   function Section({ label, children, cols = '1fr 1fr 1fr' }) {
     return (
       <div style={{
-        background: '#d0d3d8', borderRadius: 8, padding: '14px 16px 16px',
+        background: '#e8eaed', borderRadius: 8, padding: '14px 16px 16px',
       }}>
         <div style={{
           fontSize: 10, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.12em',
-          color: 'var(--muted)', marginBottom: 12,
+          color: '#4a4a5a', marginBottom: 12,
         }}>{label}</div>
         <div style={{ display: 'grid', gridTemplateColumns: cols, gap: '10px 16px' }}>
           {children}
