@@ -9,9 +9,9 @@ const TYPE_LABELS = {
 }
 
 const TYPE_COLORS = {
-  kategorie_zuordnen: { bg: '#fef9c3', color: '#a16207', border: '#fde68a' },
-  termin_pruefen:     { bg: '#eff6ff', color: '#2563eb', border: '#bfdbfe' },
-  manual:             { bg: '#f3f4f6', color: '#6b7280', border: '#d1d5db' },
+  kategorie_zuordnen: { bg: 'var(--orange-bg)', color: 'var(--orange)', border: 'var(--line)' },
+  termin_pruefen:     { bg: 'var(--blue-bg)',   color: 'var(--blue)',   border: 'var(--line)' },
+  manual:             { bg: 'var(--section-bg)', color: 'var(--muted)', border: 'var(--line)' },
 }
 
 export default function Aufgaben() {
@@ -78,21 +78,21 @@ export default function Aufgaben() {
                       <button
                         type="button"
                         onClick={() => navigate(`/kunden/${t.customer_id}?tab=stammdaten`)}
-                        style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--primary, #2563eb)', fontSize: 12, padding: 0, textDecoration: 'underline' }}>
+                        style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--accent)', fontSize: 12, padding: 0, textDecoration: 'underline' }}>
                         → {kundenname}
                       </button>
                     )}
                     {t.type === 'kategorie_zuordnen' && (
                       <button type="button"
                         onClick={() => navigate('/einstellungen?section=lead')}
-                        style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#2563eb', fontSize: 12, padding: 0, textDecoration: 'underline' }}>
+                        style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--accent)', fontSize: 12, padding: 0, textDecoration: 'underline' }}>
                         → Mapping in Einstellungen ergänzen
                       </button>
                     )}
                     {t.type === 'termin_pruefen' && t.customer_id && (
                       <button type="button"
                         onClick={() => navigate(`/kunden/${t.customer_id}?tab=termine`)}
-                        style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#2563eb', fontSize: 12, padding: 0, textDecoration: 'underline' }}>
+                        style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--accent)', fontSize: 12, padding: 0, textDecoration: 'underline' }}>
                         → Termine öffnen
                       </button>
                     )}

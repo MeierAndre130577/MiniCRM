@@ -22,10 +22,10 @@ function getDateStatus(dateStr) {
 }
 
 const STATUS_STYLE = {
-  overdue: { background: '#fef2f2', color: '#dc2626', border: '#fecaca', dot: '#dc2626', label: 'Überfällig' },
-  today:   { background: '#fffbeb', color: '#d97706', border: '#fde68a', dot: '#f59e0b', label: 'Heute' },
-  future:  { background: '#f0fdf4', color: '#16a34a', border: '#bbf7d0', dot: '#16a34a', label: 'Geplant' },
-  none:    { background: '#f9fafb', color: '#6b7280', border: '#e5e7eb', dot: '#9ca3af', label: '' },
+  overdue: { bg: 'var(--status-ov-bg)', color: 'var(--status-ov-c)', border: 'var(--status-ov-b)', label: 'Überfällig' },
+  today:   { bg: 'var(--status-td-bg)', color: 'var(--status-td-c)', border: 'var(--status-td-b)', label: 'Heute' },
+  future:  { bg: 'var(--status-fu-bg)', color: 'var(--status-fu-c)', border: 'var(--status-fu-b)', label: 'Geplant' },
+  none:    { bg: 'var(--section-bg)',   color: 'var(--muted)',        border: 'var(--line)',         label: '' },
 }
 
 export default function TerminUebersicht() {
@@ -55,18 +55,17 @@ export default function TerminUebersicht() {
   const today   = filtered.filter(r => getDateStatus(r.folgetermin_datum) === 'today').length
 
   return (
-    <div style={{ padding: 32, maxWidth: 1100 }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
+    <>
+      <div className="page-header">
         <div>
-          <h1 style={{ margin: 0, fontSize: 22, fontWeight: 700 }}>Terminübersicht</h1>
-          <p style={{ margin: '4px 0 0', color: 'var(--muted)', fontSize: 13 }}>
-            Folgetermine aller zugewiesenen Kunden
-          </p>
+          <div className="page-title">Terminübersicht</div>
+          <div className="page-sub">Folgetermine aller zugewiesenen Kunden</div>
         </div>
-        <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+        <div style={{ marginLeft: 'auto', display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
           {overdue > 0 && (
             <span style={{
-              background: '#fef2f2', color: '#dc2626', border: '1px solid #fecaca',
+              background: 'var(--status-ov-bg)', color: 'var(--status-ov-c)',
+              border: '1px solid var(--status-ov-b)',
               borderRadius: 20, fontSize: 12, fontWeight: 700, padding: '4px 12px',
             }}>
               {overdue} überfällig
@@ -74,7 +73,8 @@ export default function TerminUebersicht() {
           )}
           {today > 0 && (
             <span style={{
-              background: '#fffbeb', color: '#d97706', border: '1px solid #fde68a',
+              background: 'var(--status-td-bg)', color: 'var(--status-td-c)',
+              border: '1px solid var(--status-td-b)',
               borderRadius: 20, fontSize: 12, fontWeight: 700, padding: '4px 12px',
             }}>
               {today} heute
@@ -83,16 +83,15 @@ export default function TerminUebersicht() {
         </div>
       </div>
 
-      {/* Berater-Filter */}
       <div style={{ display: 'flex', gap: 8, marginBottom: 20, flexWrap: 'wrap' }}>
         <button
           onClick={() => setBerater('alle')}
           style={{
             padding: '6px 16px', borderRadius: 20, fontSize: 13, fontWeight: 700, cursor: 'pointer',
-            border: berater === 'alle' ? '2px solid #1d4ed8' : '2px solid var(--line)',
-            background: berater === 'alle' ? '#1d4ed8' : 'var(--card)',
+            border: berater === 'alle' ? '2px solid var(--accent)' : '2px solid var(--line)',
+            background: berater === 'alle' ? 'var(--accent)' : 'var(--white)',
             color: berater === 'alle' ? '#fff' : 'var(--muted)',
-            boxShadow: berater === 'alle' ? '0 2px 8px rgba(29,78,216,0.35)' : 'none',
+            boxShadow: berater === 'alle' ? '0 2px 8px rgba(0,0,0,0.15)' : 'none',
           }}
         >
           Alle ({rows.length})
@@ -103,10 +102,10 @@ export default function TerminUebersicht() {
             onClick={() => setBerater(b)}
             style={{
               padding: '6px 16px', borderRadius: 20, fontSize: 13, fontWeight: 700, cursor: 'pointer',
-              border: berater === b ? '2px solid #1d4ed8' : '2px solid var(--line)',
-              background: berater === b ? '#1d4ed8' : 'var(--card)',
+              border: berater === b ? '2px solid var(--accent)' : '2px solid var(--line)',
+              background: berater === b ? 'var(--accent)' : 'var(--white)',
               color: berater === b ? '#fff' : 'var(--muted)',
-              boxShadow: berater === b ? '0 2px 8px rgba(29,78,216,0.35)' : 'none',
+              boxShadow: berater === b ? '0 2px 8px rgba(0,0,0,0.15)' : 'none',
             }}
           >
             {b.split(' ')[0]} ({counts[b] || 0})
@@ -126,56 +125,43 @@ export default function TerminUebersicht() {
           <div style={{ fontSize: 13, marginTop: 4 }}>Folgetermin-Datum in der Kundenakte erfassen</div>
         </div>
       ) : (
-        <div style={{
-          background: 'var(--card)', border: '1px solid var(--line)',
-          borderRadius: 12, overflow: 'hidden',
-        }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 14 }}>
+        <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
+          <table className="table">
             <thead>
-              <tr style={{ background: 'var(--bg)', borderBottom: '2px solid var(--line)' }}>
-                <th style={{ padding: '10px 16px', textAlign: 'left', fontWeight: 600, color: 'var(--muted)', fontSize: 12, width: 110 }}>Status</th>
-                <th style={{ padding: '10px 16px', textAlign: 'left', fontWeight: 600, color: 'var(--muted)', fontSize: 12, width: 110 }}>Datum</th>
-                <th style={{ padding: '10px 16px', textAlign: 'left', fontWeight: 600, color: 'var(--muted)', fontSize: 12 }}>Kunde</th>
-                {berater === 'alle' && (
-                  <th style={{ padding: '10px 16px', textAlign: 'left', fontWeight: 600, color: 'var(--muted)', fontSize: 12, width: 150 }}>Berater</th>
-                )}
-                <th style={{ padding: '10px 16px', textAlign: 'left', fontWeight: 600, color: 'var(--muted)', fontSize: 12 }}>Notiz</th>
-                <th style={{ padding: '10px 16px', textAlign: 'left', fontWeight: 600, color: 'var(--muted)', fontSize: 12, width: 160 }}>Letzter Kontakt</th>
+              <tr>
+                <th style={{ width: 110 }}>Status</th>
+                <th style={{ width: 110 }}>Datum</th>
+                <th>Kunde</th>
+                {berater === 'alle' && <th style={{ width: 150 }}>Berater</th>}
+                <th>Notiz</th>
+                <th style={{ width: 160 }}>Letzter Kontakt</th>
               </tr>
             </thead>
             <tbody>
-              {filtered.map((r, i) => {
+              {filtered.map(r => {
                 const st = getDateStatus(r.folgetermin_datum)
                 const s  = STATUS_STYLE[st]
                 return (
                   <tr
                     key={r.id}
                     onClick={() => navigate(`/kunden/${r.id}?tab=termine`)}
-                    style={{
-                      borderBottom: i < filtered.length - 1 ? '1px solid var(--line)' : 'none',
-                      cursor: 'pointer',
-                      transition: 'background 0.1s',
-                    }}
-                    onMouseEnter={e => e.currentTarget.style.background = 'var(--bg)'}
-                    onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
                   >
-                    <td style={{ padding: '12px 16px' }}>
+                    <td>
                       <span style={{
                         display: 'inline-flex', alignItems: 'center', gap: 5,
                         padding: '3px 10px', borderRadius: 20, fontSize: 11, fontWeight: 700,
-                        background: s.background, color: s.color,
-                        border: `1px solid ${s.border}`,
+                        background: s.bg, color: s.color, border: `1px solid ${s.border}`,
                       }}>
-                        <span style={{ width: 6, height: 6, borderRadius: '50%', background: s.dot, flexShrink: 0 }} />
+                        <span style={{ width: 6, height: 6, borderRadius: '50%', background: s.color, flexShrink: 0 }} />
                         {s.label}
                       </span>
                     </td>
-                    <td style={{ padding: '12px 16px', fontWeight: 600, color: s.color }}>
+                    <td style={{ fontWeight: 600, color: s.color }}>
                       {datumLabel(r.folgetermin_datum)}
                     </td>
-                    <td style={{ padding: '12px 16px' }}>
+                    <td>
                       <div style={{ fontWeight: 600 }}>
-                        {r.p1_vorname} {r.p1_nachname}
+                        {r.p1_nachname} {r.p1_vorname}
                       </div>
                       {(r.p1_handy || r.p1_email) && (
                         <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 2 }}>
@@ -184,19 +170,19 @@ export default function TerminUebersicht() {
                       )}
                     </td>
                     {berater === 'alle' && (
-                      <td style={{ padding: '12px 16px', color: 'var(--muted)', fontSize: 13 }}>
+                      <td style={{ color: 'var(--muted)', fontSize: 13 }}>
                         {r.berater || '—'}
                       </td>
                     )}
-                    <td style={{ padding: '12px 16px', color: 'var(--muted)', fontSize: 13, maxWidth: 260 }}>
+                    <td style={{ color: 'var(--muted)', fontSize: 13, maxWidth: 260 }}>
                       <div style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                         {r.folgetermin_notizen || '—'}
                       </div>
                     </td>
-                    <td style={{ padding: '12px 16px', fontSize: 12 }}>
+                    <td style={{ fontSize: 12 }}>
                       {r.letzter_status ? (
                         <div>
-                          <div style={{ fontWeight: 600, color: 'var(--text)' }}>{r.letzter_status}</div>
+                          <div style={{ fontWeight: 600 }}>{r.letzter_status}</div>
                           {r.letzter_termin_datum && (
                             <div style={{ color: 'var(--muted)', marginTop: 1 }}>
                               {datumLabel(r.letzter_termin_datum)}
@@ -214,6 +200,6 @@ export default function TerminUebersicht() {
           </table>
         </div>
       )}
-    </div>
+    </>
   )
 }

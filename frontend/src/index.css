@@ -22,6 +22,10 @@
   --shadow:     0 2px 8px rgba(0,0,0,.07);
   --section-bg: #e8eaed;
   --input-bg:   #ffffff;
+  /* Status-Badge Variablen */
+  --status-ov-bg: #fef2f2; --status-ov-c: #dc2626; --status-ov-b: #fecaca;
+  --status-td-bg: #fffbeb; --status-td-c: #d97706; --status-td-b: #fde68a;
+  --status-fu-bg: #f0fdf4; --status-fu-c: #16a34a; --status-fu-b: #bbf7d0;
 }
 
 /* Marine (Blau) */
@@ -79,6 +83,9 @@
   --shadow:       0 2px 8px rgba(0,0,0,.4);
   --section-bg:   #1a2840;
   --input-bg:     #2d3f55;
+  --status-ov-bg: #2d1515; --status-ov-c: #f87171; --status-ov-b: #7f1d1d;
+  --status-td-bg: #2d1f07; --status-td-c: #fbbf24; --status-td-b: #78350f;
+  --status-fu-bg: #052e16; --status-fu-c: #4ade80; --status-fu-b: #14532d;
 }
 
 body {

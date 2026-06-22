@@ -53,7 +53,7 @@ export default function TestSimulation() {
         </div>
       </div>
 
-      <div style={{ fontSize: 13, color: 'var(--muted)', marginBottom: 20, padding: '10px 14px', background: '#fef9c3', borderRadius: 8, border: '1px solid #fde68a', maxWidth: 640 }}>
+      <div style={{ fontSize: 13, color: 'var(--orange)', marginBottom: 20, padding: '10px 14px', background: 'var(--orange-bg)', borderRadius: 8, border: '1px solid var(--line)', maxWidth: 640 }}>
         Diese Simulationen ersetzen Prozesse, die später automatisch ablaufen werden (z.B. IMAP-Abruf, WhatsApp-Webhook).
         Bis dahin können sie hier manuell ausgelöst werden.
       </div>
@@ -78,7 +78,7 @@ export default function TestSimulation() {
               <div style={{ fontWeight: 600, color: 'var(--green)', marginBottom: 4 }}>
                 ✓ Kunde angelegt —{' '}
                 <button type="button" onClick={() => navigate(`/kunden/${testResult.customer_id}?tab=uebersicht`)}
-                  style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#2563eb', fontSize: 12, fontWeight: 700, padding: 0, textDecoration: 'underline' }}>
+                  style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--accent)', fontSize: 12, fontWeight: 700, padding: 0, textDecoration: 'underline' }}>
                   ID {testResult.customer_id} öffnen →
                 </button>
               </div>
