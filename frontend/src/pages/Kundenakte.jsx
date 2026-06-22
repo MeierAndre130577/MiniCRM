@@ -81,6 +81,8 @@ export default function Kundenakte() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const tab = searchParams.get('tab') || 'uebersicht'
+  const FORM_TABS = ['stammdaten', 'ansprechpartner', 'budget', 'notizen']
+  const activeFormId = FORM_TABS.includes(tab) ? `form-${tab}` : null
   const [kunde, setKunde]           = useState(null)
   const [saving, setSaving]         = useState(false)
   const [katModal, setKatModal]     = useState(null)
@@ -199,8 +201,15 @@ export default function Kundenakte() {
             {saving && <span style={{ marginLeft: 10, color: 'var(--muted)', fontSize: 12 }}>Speichert…</span>}
           </div>
         </div>
-        <button className="btn btn-danger btn-sm" style={{ marginLeft: 'auto' }}
-          onClick={deleteKunde}>Löschen</button>
+        <div style={{ marginLeft: 'auto', display: 'flex', gap: 8 }}>
+          {activeFormId && (
+            <button type="submit" form={activeFormId} className="btn btn-primary btn-sm" disabled={saving}>
+              {saving ? 'Speichert…' : 'Speichern'}
+            </button>
+          )}
+          <button type="button" className="btn btn-ghost btn-sm" style={{ color: 'var(--red)', borderColor: 'var(--red)' }}
+            onClick={deleteKunde}>Löschen</button>
+        </div>
       </div>
 
       {/* ── Übersicht ── */}
@@ -528,7 +537,7 @@ function StammdatenTab({ kunde, saveAll }) {
   const p2Title = [form.p2_vorname, form.p2_nachname].filter(Boolean).join(' ') || 'Person 2'
 
   return (
-    <form onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+    <form id="form-stammdaten" onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
 
       {/* ── Agenturdaten ── */}
       <div>
@@ -610,9 +619,6 @@ function StammdatenTab({ kunde, saveAll }) {
         </div>
       </div>
 
-      <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-        <button type="submit" className="btn btn-primary">Speichern</button>
-      </div>
     </form>
   )
 }
@@ -627,7 +633,7 @@ function ApScoresTab({ apScores, saveAll, kunde }) {
   }
 
   return (
-    <form onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+    <form id="form-ansprechpartner" onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
       <div className="card">
         <div className="section-label" style={{ marginBottom: 16 }}>Bewertung je Bereich (0–10)</div>
         {AP_BEREICHE.map(b => (
@@ -684,9 +690,6 @@ function ApScoresTab({ apScores, saveAll, kunde }) {
         </div>
       </div>
 
-      <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-        <button type="submit" className="btn btn-primary">Speichern</button>
-      </div>
     </form>
   )
 }
@@ -706,7 +709,7 @@ function BudgetTab({ kunde, saveAll }) {
     (Number(form.hhr_einnahmen_weitere) || 0)
 
   return (
-    <form onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+    <form id="form-budget" onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
       <div className="card">
         <div className="section-label" style={{ marginBottom: 12 }}>Budget für Neuverträge</div>
         <div className="grid-2">
@@ -768,9 +771,6 @@ function BudgetTab({ kunde, saveAll }) {
         </div>
       </div>
 
-      <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-        <button type="submit" className="btn btn-primary">Speichern</button>
-      </div>
     </form>
   )
 }
@@ -1006,7 +1006,7 @@ function NotizTab({ kunde, saveAll }) {
   }
 
   return (
-    <form onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+    <form id="form-notizen" onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
       {/* Empfehlung & Bewertung */}
       <div className="card">
         <div className="section-label" style={{ marginBottom: 12 }}>Empfehlung & Bewertung</div>
@@ -1052,9 +1052,6 @@ function NotizTab({ kunde, saveAll }) {
         </Field>
       </div>
 
-      <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-        <button type="submit" className="btn btn-primary">Speichern</button>
-      </div>
     </form>
   )
 }
