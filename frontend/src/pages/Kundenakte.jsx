@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom'
 import { customers, tasks } from '../lib/api'
 import VertraegeTab from './VertraegeTab'
+import UebersichtKomplett from './UebersichtKomplett'
 import AddressAutocomplete, { validateAddress } from '../components/AddressAutocomplete'
 
 const KONTAKTQUELLEN = ['Dummy', 'Lead', 'Empfehlung', 'Bestandskunde', 'Sonstiges']
@@ -216,90 +217,12 @@ export default function Kundenakte() {
 
       {/* ── Übersicht ── */}
       {tab === 'uebersicht' && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-          {/* Excel-Export */}
-          <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-            <a
-              href={customers.exportExcelUrl(Number(id))}
-              download
-              className="btn btn-primary btn-sm"
-              style={{ textDecoration: 'none' }}
-            >
-              Excel-Analyse herunterladen
-            </a>
-          </div>
-
-          {/* KPI Chips */}
-          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-            {[
-              { label: 'Besprochen', value: `${besprochen} / 15`, cls: 'badge-green' },
-              { label: 'Offen', value: offen, cls: 'badge-orange' },
-              { label: 'Kein Interesse', value: keinInteresse, cls: 'badge-red' },
-              { label: 'Folgetermin', value: kunde.folgetermin_datum ? new Date(kunde.folgetermin_datum).toLocaleDateString('de-DE') : '—', cls: 'badge-blue' },
-              { label: 'Budget frei', value: kunde.hhr_freier_betrag ? `${kunde.hhr_freier_betrag} €` : '—', cls: 'badge-gray' },
-            ].map(k => (
-              <div key={k.label} style={{ display: 'flex', alignItems: 'center', gap: 6,
-                background: 'var(--white)', border: '1px solid var(--line)', borderRadius: 8,
-                padding: '6px 12px', fontSize: 13 }}>
-                <span style={{ color: 'var(--muted)' }}>{k.label}:</span>
-                <span className={`badge ${k.cls}`}>{k.value}</span>
-              </div>
-            ))}
-          </div>
-
-          {/* Kategorien kompakt */}
-          <div className="card" style={{ padding: '12px 14px' }}>
-            <div className="section-label" style={{ marginBottom: 10 }}>Kategorien</div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 6 }}>
-              {Object.entries(KATEGORIE_META).map(([key, meta]) => {
-                const s = (cats[key] || {}).status || 'nicht_besprochen'
-                const { border, bg } = statusColors(s)
-                const isAnfrage = anfragKats.includes(key)
-                return (
-                  <div key={key} onClick={() => navigate(`/kunden/${id}?tab=kategorien`)} style={{
-                    position: 'relative',
-                    display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4,
-                    padding: '8px 4px', borderRadius: 8, cursor: 'pointer',
-                    border: `1px solid ${border}`, background: bg,
-                    transition: 'opacity .15s',
-                  }}>
-                    {isAnfrage && (
-                      <span style={{
-                        position: 'absolute', top: -6, right: -6,
-                        fontSize: 16, color: '#2563eb', lineHeight: 1,
-                        background: 'white', borderRadius: '50%',
-                        width: 20, height: 20, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        boxShadow: '0 1px 4px rgba(0,0,0,0.15)',
-                      }} title="Anfrage-Interesse">ℹ</span>
-                    )}
-                    <span style={{ fontSize: 18 }}>{meta.icon}</span>
-                    <span style={{ fontSize: 10, fontWeight: 600, textAlign: 'center', color: 'var(--text)', lineHeight: 1.3 }}>
-                      {meta.label}
-                    </span>
-                  </div>
-                )
-              })}
-            </div>
-          </div>
-
-          {/* Kontakt + Berater kompakt */}
-          <div className="card" style={{ padding: '12px 14px' }}>
-            <div style={{ display: 'flex', gap: 20, flexWrap: 'wrap' }}>
-              {[
-                { label: 'E-Mail', value: kunde.p1_email },
-                { label: 'Handy', value: kunde.p1_handy },
-                { label: 'Beruf', value: kunde.p1_beruf },
-                { label: 'Berater', value: kunde.berater },
-                { label: 'Notizen', value: kunde.notizen },
-              ].filter(f => f.value).map(f => (
-                <div key={f.label} style={{ fontSize: 12 }}>
-                  <span style={{ color: 'var(--muted)' }}>{f.label}: </span>
-                  <span style={{ fontWeight: 600 }}>{f.value}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
+        <UebersichtKomplett
+          kunde={kunde}
+          cats={cats}
+          contracts={contracts}
+          id={id}
+        />
       )}
 
       {/* ── Stammdaten ── */}
