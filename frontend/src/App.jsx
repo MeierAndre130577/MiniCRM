@@ -4,6 +4,7 @@ import Kundenliste        from './pages/Kundenliste'
 import Kundenakte         from './pages/Kundenakte'
 import AdminEinstellungen from './pages/AdminEinstellungen'
 import Aufgaben           from './pages/Aufgaben'
+import TestSimulation     from './pages/TestSimulation'
 import { tasks } from './lib/api'
 
 const KUNDE_TABS = [
@@ -92,6 +93,11 @@ export default function App() {
             <span className="icon">⚙️</span>
             Einstellungen
           </NavLink>
+          <NavLink to="/test-simulation"
+            className={({ isActive }) => `nav-item${isActive ? ' active' : ''}`}>
+            <span className="icon">🧪</span>
+            Test-Simulation
+          </NavLink>
         </div>
       </aside>
 
@@ -101,7 +107,8 @@ export default function App() {
           <Route path="/kunden"         element={<Kundenliste />} />
           <Route path="/kunden/:id"     element={<Kundenakte />} />
           <Route path="/aufgaben"       element={<Aufgaben />} />
-          <Route path="/einstellungen"  element={<AdminEinstellungen />} />
+          <Route path="/einstellungen"   element={<AdminEinstellungen />} />
+          <Route path="/test-simulation" element={<TestSimulation />} />
         </Routes>
       </main>
     </div>
