@@ -1,15 +1,16 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom'
 import { customers } from '../lib/api'
+import VertraegeTab from './VertraegeTab'
 
 const KONTAKTQUELLEN = ['Dummy', 'Lead', 'Empfehlung', 'Bestandskunde', 'Sonstiges']
 
 const TAG_COLORS = {
-  Dummy:        { bg: '#f3f4f6', color: '#6b7280', border: '#d1d5db' },
-  Lead:         { bg: '#eff6ff', color: '#2563eb', border: '#bfdbfe' },
-  Empfehlung:   { bg: '#f0fdf4', color: '#16a34a', border: '#bbf7d0' },
-  Bestandskunde:{ bg: '#fef9c3', color: '#a16207', border: '#fde68a' },
-  Sonstiges:    { bg: '#fdf4ff', color: '#9333ea', border: '#e9d5ff' },
+  Dummy:        { bg: 'var(--tag-dummy-bg)', color: 'var(--tag-dummy-c)', border: 'var(--tag-dummy-b)' },
+  Lead:         { bg: 'var(--tag-lead-bg)',  color: 'var(--tag-lead-c)',  border: 'var(--tag-lead-b)' },
+  Empfehlung:   { bg: 'var(--tag-empf-bg)',  color: 'var(--tag-empf-c)',  border: 'var(--tag-empf-b)' },
+  Bestandskunde:{ bg: 'var(--tag-best-bg)',  color: 'var(--tag-best-c)',  border: 'var(--tag-best-b)' },
+  Sonstiges:    { bg: 'var(--tag-sonst-bg)', color: 'var(--tag-sonst-c)', border: 'var(--tag-sonst-b)' },
 }
 
 const EMPTY_CONTRACT = {
@@ -335,6 +336,11 @@ export default function Kundenakte() {
       {/* ── Notizen ── */}
       {tab === 'notizen' && (
         <NotizTab kunde={kunde} saveAll={saveAll} />
+      )}
+
+      {/* ── Verträge ── */}
+      {tab === 'vertraege' && (
+        <VertraegeTab contracts={contracts} setContracts={setContracts} customerId={Number(id)} />
       )}
 
       {/* Kategorie Modal */}

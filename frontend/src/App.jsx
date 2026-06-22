@@ -16,6 +16,7 @@ const KUNDE_TABS = [
   { key: 'budget',          icon: '💰', label: 'Budget' },
   { key: 'termine',         icon: '📅', label: 'Termine' },
   { key: 'notizen',         icon: '📝', label: 'Notizen' },
+  { key: 'vertraege',       icon: '📄', label: 'Verträge' },
 ]
 
 export default function App() {
