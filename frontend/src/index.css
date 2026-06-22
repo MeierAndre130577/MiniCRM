@@ -21,6 +21,7 @@
   --radius:     10px;
   --shadow:     0 2px 8px rgba(0,0,0,.07);
   --section-bg: #e8eaed;
+  --input-bg:   #ffffff;
 }
 
 /* Marine (Blau) */
@@ -37,6 +38,7 @@
   --white:        #ffffff;
   --shadow:       0 2px 8px rgba(37,99,235,.1);
   --section-bg:   #dde3f0;
+  --input-bg:     #ffffff;
 }
 
 /* Wald (Grün) */
@@ -53,6 +55,7 @@
   --white:        #ffffff;
   --shadow:       0 2px 8px rgba(22,163,74,.1);
   --section-bg:   #d4edda;
+  --input-bg:     #ffffff;
 }
 
 /* Dunkel */
@@ -74,7 +77,8 @@
   --blue:         #60a5fa;
   --blue-bg:      #1e3a5f;
   --shadow:       0 2px 8px rgba(0,0,0,.4);
-  --section-bg:   #263347;
+  --section-bg:   #1a2840;
+  --input-bg:     #2d3f55;
 }
 
 body {
@@ -188,7 +192,7 @@ body {
   font-size: 13px;
   font-family: inherit;
   color: var(--text);
-  background: var(--white);
+  background: var(--input-bg);
   outline: none;
   transition: border-color .15s;
   width: 100%;
@@ -236,7 +240,7 @@ body {
   vertical-align: middle;
 }
 .table tr:last-child td { border-bottom: none; }
-.table tr:hover td { background: #fafbfc; cursor: pointer; }
+.table tr:hover td { background: var(--bg); cursor: pointer; }
 
 /* ── Tabs ────────────────────────────────────────────────────────────────── */
 .tabs { display: flex; gap: 2px; border-bottom: 2px solid var(--line); margin-bottom: 24px; flex-wrap: wrap; }
