@@ -379,13 +379,19 @@ function StammdatenTab({ kunde, saveAll }) {
   const GKV_STAND = ['Arbeitnehmer/in', 'Freiwillig versicherte/r Arbeitnehmer/in', 'Auszubildende/r', 'Student/in', 'Rentner/in', 'Elternzeit', 'Selbstständige/r']
   const FAMILIENSTAND = ['ledig', 'verheiratet', 'geschieden', 'verwitwet', 'Lebenspartnerschaft']
 
-  function SectionLabel({ children }) {
+  function Section({ label, children, cols = '1fr 1fr 1fr' }) {
     return (
       <div style={{
-        fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.1em',
-        color: 'var(--muted)', borderBottom: '1px solid var(--line)',
-        paddingBottom: 6, marginBottom: 12, marginTop: 4,
-      }}>{children}</div>
+        background: 'var(--bg)', borderRadius: 8, padding: '14px 16px 16px',
+      }}>
+        <div style={{
+          fontSize: 10, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.12em',
+          color: 'var(--muted)', marginBottom: 12,
+        }}>{label}</div>
+        <div style={{ display: 'grid', gridTemplateColumns: cols, gap: '10px 16px' }}>
+          {children}
+        </div>
+      </div>
     )
   }
 
@@ -398,20 +404,17 @@ function StammdatenTab({ kunde, saveAll }) {
       <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
         <div onClick={() => setOpen(o => !o)} style={{
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-          padding: '12px 20px', cursor: 'pointer', userSelect: 'none',
+          padding: '13px 20px', cursor: 'pointer', userSelect: 'none',
           borderBottom: open ? '1px solid var(--line)' : 'none',
-          background: 'var(--bg)',
         }}>
-          <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text)' }}>{title}</span>
-          <span style={{ fontSize: 12, color: 'var(--muted)', transform: open ? 'rotate(180deg)' : 'none', transition: 'transform .2s' }}>▼</span>
+          <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--text)' }}>{title}</span>
+          <span style={{ fontSize: 11, color: 'var(--muted)', transform: open ? 'rotate(180deg)' : 'none', transition: 'transform .2s' }}>▼</span>
         </div>
 
         {open && (
-          <div style={{ padding: '20px 20px 8px' }}>
+          <div style={{ padding: 16, display: 'flex', flexDirection: 'column', gap: 10 }}>
 
-            {/* Identität */}
-            <SectionLabel>Identität</SectionLabel>
-            <div style={{ display: 'grid', gridTemplateColumns: '120px 1fr 1fr', gap: '10px 16px', marginBottom: 20 }}>
+            <Section label="Identität" cols="120px 1fr 1fr">
               <Field label="Anrede">
                 <select className="form-select" value={g('anrede') || ''} onChange={s('anrede')}>
                   <option value="">—</option>
@@ -439,11 +442,9 @@ function StammdatenTab({ kunde, saveAll }) {
                   <option value={0}>Nein</option><option value={1}>Ja</option>
                 </select>
               </Field>
-            </div>
+            </Section>
 
-            {/* Kontakt */}
-            <SectionLabel>Kontakt</SectionLabel>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px 16px', marginBottom: 20 }}>
+            <Section label="Kontakt" cols="1fr 1fr 1fr">
               <Field label="E-Mail">
                 <input type="email" className="form-input" value={g('email') || ''} onChange={s('email')} />
               </Field>
@@ -453,11 +454,9 @@ function StammdatenTab({ kunde, saveAll }) {
               <Field label="Festnetz">
                 <input className="form-input" value={g('festnetz') || ''} onChange={s('festnetz')} />
               </Field>
-            </div>
+            </Section>
 
-            {/* Adresse */}
-            <SectionLabel>Adresse</SectionLabel>
-            <div style={{ display: 'grid', gridTemplateColumns: '2fr 100px 1fr', gap: '10px 16px', marginBottom: 20 }}>
+            <Section label="Adresse" cols="2fr 90px 1fr">
               <Field label="Straße & Nr.">
                 <input className="form-input" value={g('strasse') || ''} onChange={s('strasse')} />
               </Field>
@@ -467,11 +466,9 @@ function StammdatenTab({ kunde, saveAll }) {
               <Field label="Ort">
                 <input className="form-input" value={g('ort') || ''} onChange={s('ort')} />
               </Field>
-            </div>
+            </Section>
 
-            {/* Beruf & Einkommen */}
-            <SectionLabel>Beruf & Einkommen</SectionLabel>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px 16px', marginBottom: 20 }}>
+            <Section label="Beruf & Einkommen" cols="1fr 1fr 1fr">
               <Field label="Beruf">
                 <input className="form-input" value={g('beruf') || ''} onChange={s('beruf')} />
               </Field>
@@ -508,18 +505,16 @@ function StammdatenTab({ kunde, saveAll }) {
               <Field label="IBAN">
                 <input className="form-input" value={g('iban') || ''} onChange={s('iban')} />
               </Field>
-            </div>
+            </Section>
 
-            {/* Persönliches */}
-            <SectionLabel>Persönliches</SectionLabel>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px 16px', marginBottom: 16 }}>
+            <Section label="Persönliches" cols="1fr 1fr">
               <Field label="Hobby">
                 <input className="form-input" value={g('hobby') || ''} onChange={s('hobby')} />
               </Field>
               <Field label="Haustiere">
                 <input className="form-input" value={g('haustiere') || ''} onChange={s('haustiere')} />
               </Field>
-            </div>
+            </Section>
 
           </div>
         )}
