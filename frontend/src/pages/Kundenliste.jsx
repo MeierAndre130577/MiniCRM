@@ -58,11 +58,23 @@ function KontaktTag({ label, small }) {
 export default function Kundenliste() {
   const [list, setList]           = useState([])
   const [search, setSearch]       = useState('')
-  const [filterKq, setFilterKq]   = useState([])   // active Kontaktquelle filters
+  const [filterKq, setFilterKq]   = useState([])
   const [showNew, setShowNew]     = useState(false)
   const [form, setForm]           = useState(EMPTY)
   const [saving, setSaving]       = useState(false)
+  const [sortCol, setSortCol]     = useState('nachname')
+  const [sortDir, setSortDir]     = useState('asc')
   const navigate = useNavigate()
+
+  function toggleSort(col) {
+    if (sortCol === col) setSortDir(d => d === 'asc' ? 'desc' : 'asc')
+    else { setSortCol(col); setSortDir('asc') }
+  }
+
+  function sortIcon(col) {
+    if (sortCol !== col) return <span style={{ color: 'var(--line)', marginLeft: 4 }}>↕</span>
+    return <span style={{ marginLeft: 4 }}>{sortDir === 'asc' ? '↑' : '↓'}</span>
+  }
 
   useEffect(() => { load() }, [])
 
@@ -84,6 +96,25 @@ export default function Kundenliste() {
     const kq = Array.isArray(c.kontaktquelle) ? c.kontaktquelle : []
     const matchFilter = filterKq.length === 0 || filterKq.some(f => kq.includes(f))
     return matchSearch && matchFilter
+  })
+
+  const sorted = [...filtered].sort((a, b) => {
+    let va, vb
+    if (sortCol === 'nachname') {
+      va = `${a.p1_nachname || ''} ${a.p1_vorname || ''}`.toLowerCase()
+      vb = `${b.p1_nachname || ''} ${b.p1_vorname || ''}`.toLowerCase()
+    } else if (sortCol === 'berater') {
+      va = (a.berater || '').toLowerCase()
+      vb = (b.berater || '').toLowerCase()
+    } else if (sortCol === 'folgetermin') {
+      va = a.folgetermin_datum || 'zzzz'
+      vb = b.folgetermin_datum || 'zzzz'
+    } else {
+      return 0
+    }
+    if (va < vb) return sortDir === 'asc' ? -1 : 1
+    if (va > vb) return sortDir === 'asc' ? 1 : -1
+    return 0
   })
 
   async function handleCreate(e) {
@@ -199,23 +230,29 @@ export default function Kundenliste() {
           <table className="table">
             <thead>
               <tr>
-                <th>Name</th>
+                <th onClick={() => toggleSort('nachname')} style={{ cursor: 'pointer', userSelect: 'none' }}>
+                  Name{sortIcon('nachname')}
+                </th>
                 <th>Kontakt</th>
                 <th>Quelle</th>
-                <th>Berater</th>
+                <th onClick={() => toggleSort('berater')} style={{ cursor: 'pointer', userSelect: 'none' }}>
+                  Berater{sortIcon('berater')}
+                </th>
                 <th>Kategorien</th>
-                <th>Folgetermin</th>
+                <th onClick={() => toggleSort('folgetermin')} style={{ cursor: 'pointer', userSelect: 'none' }}>
+                  Folgetermin{sortIcon('folgetermin')}
+                </th>
               </tr>
             </thead>
             <tbody>
-              {filtered.map(c => {
+              {sorted.map(c => {
                 const kq = Array.isArray(c.kontaktquelle) ? c.kontaktquelle : []
                 return (
                   <tr key={c.id} onClick={() => navigate(`/kunden/${c.id}`)}>
                     <td>
-                      <div style={{ fontWeight: 700 }}>{c.p1_vorname} {c.p1_nachname}</div>
+                      <div style={{ fontWeight: 700 }}>{c.p1_nachname} {c.p1_vorname}</div>
                       {c.p2_vorname && (
-                        <div style={{ fontSize: 11, color: 'var(--muted)' }}>+ {c.p2_vorname} {c.p2_nachname}</div>
+                        <div style={{ fontSize: 11, color: 'var(--muted)' }}>+ {c.p2_nachname} {c.p2_vorname}</div>
                       )}
                     </td>
                     <td>

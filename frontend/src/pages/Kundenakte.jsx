@@ -512,7 +512,9 @@ function StammdatenTab({ kunde, saveAll }) {
   }
 
   const p1Title = [form.p1_vorname, form.p1_nachname].filter(Boolean).join(' ') || 'Person 1'
-  const p2Title = [form.p2_vorname, form.p2_nachname].filter(Boolean).join(' ') || 'Person hinzufügen'
+  const hasP2Data = !!(form.p2_vorname || form.p2_nachname || form.p2_email || form.p2_handy)
+  const [showP2, setShowP2] = useState(hasP2Data)
+  const p2Title = [form.p2_vorname, form.p2_nachname].filter(Boolean).join(' ') || 'Person 2'
 
   return (
     <form onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
@@ -547,7 +549,19 @@ function StammdatenTab({ kunde, saveAll }) {
       </div>
 
       <PersonForm prefix="p1" title={p1Title} defaultOpen={true} />
-      <PersonForm prefix="p2" title={p2Title} defaultOpen={false} />
+      {showP2
+        ? <PersonForm prefix="p2" title={p2Title} defaultOpen={true} />
+        : (
+          <button type="button" onClick={() => setShowP2(true)} style={{
+            display: 'flex', alignItems: 'center', gap: 8,
+            padding: '10px 16px', borderRadius: 8, fontSize: 13, fontWeight: 600,
+            border: '2px dashed var(--line)', background: 'transparent',
+            color: 'var(--muted)', cursor: 'pointer', width: '100%',
+          }}>
+            <span style={{ fontSize: 16 }}>+</span> Person hinzufügen
+          </button>
+        )
+      }
 
       <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
         <button type="submit" className="btn btn-primary">Speichern</button>
