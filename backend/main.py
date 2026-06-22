@@ -179,7 +179,7 @@ def list_customers():
     with db() as conn:
         rows = conn.execute("""
             SELECT c.id, c.created_at, c.updated_at,
-                   c.p1_vorname, c.p1_nachname, c.p1_email, c.p1_handy, c.p1_ort,
+                   c.p1_vorname, c.p1_nachname, c.p1_email, c.p1_handy, c.p1_strasse, c.p1_plz, c.p1_ort,
                    c.p2_vorname, c.p2_nachname,
                    c.berater, c.folgetermin_datum, c.kontaktquelle,
                    c.bewertung_google,
