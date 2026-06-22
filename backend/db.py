@@ -1,5 +1,6 @@
-import psycopg2
-import psycopg2.extras
+import psycopg
+from psycopg import ClientCursor
+from psycopg.rows import dict_row
 import os
 import json
 from contextlib import contextmanager
@@ -15,12 +16,12 @@ CATEGORIES = [
 
 
 class _Conn:
-    """Wraps psycopg2 connection to mimic sqlite3 connection interface."""
+    """Wraps psycopg3 connection to mimic sqlite3 connection interface."""
     def __init__(self, raw):
         self._raw = raw
 
     def execute(self, sql, params=None):
-        cur = self._raw.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+        cur = ClientCursor(self._raw, row_factory=dict_row)
         cur.execute(sql, params)
         return cur
 
@@ -36,7 +37,7 @@ class _Conn:
 
 @contextmanager
 def db():
-    raw = psycopg2.connect(DATABASE_URL)
+    raw = psycopg.connect(DATABASE_URL)
     conn = _Conn(raw)
     try:
         yield conn
