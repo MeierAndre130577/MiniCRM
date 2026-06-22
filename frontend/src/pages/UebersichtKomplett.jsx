@@ -102,7 +102,9 @@ export default function UebersichtKomplett({ kunde, cats, contracts, id }) {
   const navigate = useNavigate()
   const appts = kunde.appointments || []
   const filledContracts = Object.entries(KATEGORIE_META).flatMap(([k, m]) =>
-    (contracts[k] || []).map(c => ({ ...c, _key: k, _meta: m }))
+    (contracts[k] || [])
+      .filter(c => c.gesellschaft || c.police_nr || c.beitrag_alt || c.beitrag_neu)
+      .map(c => ({ ...c, _key: k, _meta: m }))
   )
 
   const einnahmen = (Number(kunde.hhr_einnahmen_gehalt) || 0)

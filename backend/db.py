@@ -206,3 +206,10 @@ def init_db():
         conn.execute("""
             ALTER TABLE contracts DROP CONSTRAINT IF EXISTS contracts_customer_id_category_key
         """)
+        conn.execute("""
+            DELETE FROM contracts
+            WHERE (gesellschaft IS NULL OR gesellschaft = '')
+              AND (police_nr    IS NULL OR police_nr    = '')
+              AND beitrag_alt IS NULL
+              AND beitrag_neu IS NULL
+        """)
