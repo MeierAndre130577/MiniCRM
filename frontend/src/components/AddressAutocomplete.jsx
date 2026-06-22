@@ -18,7 +18,7 @@ export default function AddressAutocomplete({ value, onChange, onSelect, placeho
     timer.current = setTimeout(async () => {
       setLoading(true)
       try {
-        const url = `https://api.geoapify.com/v1/geocode/autocomplete?text=${encodeURIComponent(value)}&lang=de&filter=countrycode:de&limit=6&type=street&apiKey=${API_KEY}`
+        const url = `https://api.geoapify.com/v1/geocode/autocomplete?text=${encodeURIComponent(value)}&lang=de&filter=countrycode:de&limit=6&apiKey=${API_KEY}`
         const res  = await fetch(url)
         const data = await res.json()
         setSuggestions(data.features || [])
