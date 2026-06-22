@@ -543,11 +543,14 @@ def export_excel(customer_id: int):
     wb.save(buf)
     buf.seek(0)
 
-    filename = f"KUE_{kunde.get('p1_nachname','Kunde')}_{kunde.get('p1_vorname','')}.xlsx".replace(" ", "_")
+    today    = datetime.now().strftime("%Y-%m-%d")
+    fullname = f"{kunde.get('p1_vorname','')} {kunde.get('p1_nachname','Kunde')}".strip()
+    filename = f"{today} Analyse {fullname}.xlsx"
+    encoded  = filename.encode('utf-8').decode('latin-1', errors='replace')
     return StreamingResponse(
         buf,
         media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        headers={"Content-Disposition": f"attachment; filename={filename}"}
+        headers={"Content-Disposition": f"inline; filename=\"{encoded}\"; filename*=UTF-8''{filename.replace(' ', '%20')}"}
     )
 
 
