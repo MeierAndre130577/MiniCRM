@@ -830,6 +830,11 @@ function TermineTab({ kunde, saveAll, tvStatus, showAppt, setShowAppt, apptForm,
                         <span style={{ fontWeight: 700, fontSize: 13 }}>
                           {new Date(a.datum).toLocaleDateString('de-DE')}
                         </span>
+                        {a.created_at && (
+                          <span style={{ fontSize: 11, color: 'var(--muted)' }}>
+                            {new Date(a.created_at).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })} Uhr
+                          </span>
+                        )}
                         {a.status && (
                           <span style={{
                             padding: '2px 8px', borderRadius: 20, fontSize: 11, fontWeight: 600,

@@ -51,7 +51,7 @@ def customer_full(conn, customer_id: int):
     c["categories"] = cat_map
 
     appts = conn.execute(
-        "SELECT id, datum, status, notizen, created_at FROM appointments WHERE customer_id = %s ORDER BY datum DESC",
+        "SELECT id, datum, status, notizen, created_at FROM appointments WHERE customer_id = %s ORDER BY created_at DESC",
         (customer_id,)
     ).fetchall()
     c["appointments"] = [dict(a) for a in appts]
