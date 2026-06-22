@@ -379,134 +379,150 @@ function StammdatenTab({ kunde, saveAll }) {
   const GKV_STAND = ['Arbeitnehmer/in', 'Freiwillig versicherte/r Arbeitnehmer/in', 'Auszubildende/r', 'Student/in', 'Rentner/in', 'Elternzeit', 'Selbstständige/r']
   const FAMILIENSTAND = ['ledig', 'verheiratet', 'geschieden', 'verwitwet', 'Lebenspartnerschaft']
 
+  function SectionLabel({ children }) {
+    return (
+      <div style={{
+        fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.1em',
+        color: 'var(--muted)', borderBottom: '1px solid var(--line)',
+        paddingBottom: 6, marginBottom: 12, marginTop: 4,
+      }}>{children}</div>
+    )
+  }
+
   function PersonForm({ prefix, title, defaultOpen = true }) {
     const [open, setOpen] = useState(defaultOpen)
+    const g = (k) => form[`${prefix}_${k}`]
+    const s = (k) => (e) => set(`${prefix}_${k}`, e.target.value)
+    const sNum = (k) => (e) => set(`${prefix}_${k}`, e.target.value ? Number(e.target.value) : null)
     return (
       <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
         <div onClick={() => setOpen(o => !o)} style={{
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-          padding: '12px 16px', cursor: 'pointer', userSelect: 'none',
+          padding: '12px 20px', cursor: 'pointer', userSelect: 'none',
           borderBottom: open ? '1px solid var(--line)' : 'none',
-          background: open ? 'var(--white)' : 'var(--bg)',
+          background: 'var(--bg)',
         }}>
-          <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '.07em' }}>{title}</span>
-          <span style={{ fontSize: 13, color: 'var(--muted)', transform: open ? 'rotate(180deg)' : 'none', transition: 'transform .2s' }}>▼</span>
+          <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text)' }}>{title}</span>
+          <span style={{ fontSize: 12, color: 'var(--muted)', transform: open ? 'rotate(180deg)' : 'none', transition: 'transform .2s' }}>▼</span>
         </div>
-        {open && <div style={{ padding: 16 }}><div className="grid-2" style={{ gap: 12 }}>
-          <Field label="Anrede">
-            <select className="form-select" value={form[`${prefix}_anrede`] || ''}
-              onChange={e => set(`${prefix}_anrede`, e.target.value)}>
-              <option value="">—</option>
-              <option>Herr</option><option>Frau</option>
-            </select>
-          </Field>
-          <div />
-          <Field label="Vorname">
-            <input className="form-input" value={form[`${prefix}_vorname`] || ''}
-              onChange={e => set(`${prefix}_vorname`, e.target.value)} />
-          </Field>
-          <Field label="Nachname">
-            <input className="form-input" value={form[`${prefix}_nachname`] || ''}
-              onChange={e => set(`${prefix}_nachname`, e.target.value)} />
-          </Field>
-          <Field label="Geburtsdatum">
-            <input type="date" className="form-input" value={form[`${prefix}_geburtsdatum`] || ''}
-              onChange={e => set(`${prefix}_geburtsdatum`, e.target.value)} />
-          </Field>
-          <Field label="Familienstand">
-            <select className="form-select" value={form[`${prefix}_familienstand`] || ''}
-              onChange={e => set(`${prefix}_familienstand`, e.target.value)}>
-              <option value="">—</option>
-              {FAMILIENSTAND.map(f => <option key={f}>{f}</option>)}
-            </select>
-          </Field>
-          <Field label="Straße & Nr.">
-            <input className="form-input" value={form[`${prefix}_strasse`] || ''}
-              onChange={e => set(`${prefix}_strasse`, e.target.value)} />
-          </Field>
-          <div className="grid-2" style={{ gap: 8 }}>
-            <Field label="PLZ">
-              <input className="form-input" value={form[`${prefix}_plz`] || ''}
-                onChange={e => set(`${prefix}_plz`, e.target.value)} />
-            </Field>
-            <Field label="Ort">
-              <input className="form-input" value={form[`${prefix}_ort`] || ''}
-                onChange={e => set(`${prefix}_ort`, e.target.value)} />
-            </Field>
+
+        {open && (
+          <div style={{ padding: '20px 20px 8px' }}>
+
+            {/* Identität */}
+            <SectionLabel>Identität</SectionLabel>
+            <div style={{ display: 'grid', gridTemplateColumns: '120px 1fr 1fr', gap: '10px 16px', marginBottom: 20 }}>
+              <Field label="Anrede">
+                <select className="form-select" value={g('anrede') || ''} onChange={s('anrede')}>
+                  <option value="">—</option>
+                  <option>Herr</option><option>Frau</option>
+                </select>
+              </Field>
+              <Field label="Vorname">
+                <input className="form-input" value={g('vorname') || ''} onChange={s('vorname')} />
+              </Field>
+              <Field label="Nachname">
+                <input className="form-input" value={g('nachname') || ''} onChange={s('nachname')} />
+              </Field>
+              <Field label="Geburtsdatum">
+                <input type="date" className="form-input" value={g('geburtsdatum') || ''} onChange={s('geburtsdatum')} />
+              </Field>
+              <Field label="Familienstand">
+                <select className="form-select" value={g('familienstand') || ''} onChange={s('familienstand')}>
+                  <option value="">—</option>
+                  {FAMILIENSTAND.map(f => <option key={f}>{f}</option>)}
+                </select>
+              </Field>
+              <Field label="Raucher">
+                <select className="form-select" value={g('raucher') ?? 0}
+                  onChange={e => set(`${prefix}_raucher`, Number(e.target.value))}>
+                  <option value={0}>Nein</option><option value={1}>Ja</option>
+                </select>
+              </Field>
+            </div>
+
+            {/* Kontakt */}
+            <SectionLabel>Kontakt</SectionLabel>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px 16px', marginBottom: 20 }}>
+              <Field label="E-Mail">
+                <input type="email" className="form-input" value={g('email') || ''} onChange={s('email')} />
+              </Field>
+              <Field label="Handy">
+                <input className="form-input" value={g('handy') || ''} onChange={s('handy')} />
+              </Field>
+              <Field label="Festnetz">
+                <input className="form-input" value={g('festnetz') || ''} onChange={s('festnetz')} />
+              </Field>
+            </div>
+
+            {/* Adresse */}
+            <SectionLabel>Adresse</SectionLabel>
+            <div style={{ display: 'grid', gridTemplateColumns: '2fr 100px 1fr', gap: '10px 16px', marginBottom: 20 }}>
+              <Field label="Straße & Nr.">
+                <input className="form-input" value={g('strasse') || ''} onChange={s('strasse')} />
+              </Field>
+              <Field label="PLZ">
+                <input className="form-input" value={g('plz') || ''} onChange={s('plz')} />
+              </Field>
+              <Field label="Ort">
+                <input className="form-input" value={g('ort') || ''} onChange={s('ort')} />
+              </Field>
+            </div>
+
+            {/* Beruf & Einkommen */}
+            <SectionLabel>Beruf & Einkommen</SectionLabel>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px 16px', marginBottom: 20 }}>
+              <Field label="Beruf">
+                <input className="form-input" value={g('beruf') || ''} onChange={s('beruf')} />
+              </Field>
+              <Field label="Höchster Abschluss">
+                <select className="form-select" value={g('abschluss') || ''} onChange={s('abschluss')}>
+                  <option value="">—</option>
+                  {ABSCHLUSS.map(a => <option key={a}>{a}</option>)}
+                </select>
+              </Field>
+              <Field label="Arbeitsverhältnis">
+                <select className="form-select" value={g('arbeitsverhaeltnis') || ''} onChange={s('arbeitsverhaeltnis')}>
+                  <option value="">—</option>
+                  {ARBEITSVERH.map(a => <option key={a}>{a}</option>)}
+                </select>
+              </Field>
+              <Field label="Arbeitgeber">
+                <input className="form-input" value={g('arbeitgeber') || ''} onChange={s('arbeitgeber')} />
+              </Field>
+              <Field label="Gehalt netto (€)">
+                <input type="number" className="form-input" value={g('gehalt_netto') || ''} onChange={sNum('gehalt_netto')} />
+              </Field>
+              <Field label="Gehalt brutto (€)">
+                <input type="number" className="form-input" value={g('gehalt_brutto') || ''} onChange={sNum('gehalt_brutto')} />
+              </Field>
+              <Field label="GKV-Anbieter">
+                <input className="form-input" value={g('gkv_anbieter') || ''} onChange={s('gkv_anbieter')} />
+              </Field>
+              <Field label="GKV-Stand">
+                <select className="form-select" value={g('gkv_stand') || ''} onChange={s('gkv_stand')}>
+                  <option value="">—</option>
+                  {GKV_STAND.map(x => <option key={x}>{x}</option>)}
+                </select>
+              </Field>
+              <Field label="IBAN">
+                <input className="form-input" value={g('iban') || ''} onChange={s('iban')} />
+              </Field>
+            </div>
+
+            {/* Persönliches */}
+            <SectionLabel>Persönliches</SectionLabel>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px 16px', marginBottom: 16 }}>
+              <Field label="Hobby">
+                <input className="form-input" value={g('hobby') || ''} onChange={s('hobby')} />
+              </Field>
+              <Field label="Haustiere">
+                <input className="form-input" value={g('haustiere') || ''} onChange={s('haustiere')} />
+              </Field>
+            </div>
+
           </div>
-          <Field label="E-Mail">
-            <input type="email" className="form-input" value={form[`${prefix}_email`] || ''}
-              onChange={e => set(`${prefix}_email`, e.target.value)} />
-          </Field>
-          <Field label="Handy">
-            <input className="form-input" value={form[`${prefix}_handy`] || ''}
-              onChange={e => set(`${prefix}_handy`, e.target.value)} />
-          </Field>
-          <Field label="Festnetz">
-            <input className="form-input" value={form[`${prefix}_festnetz`] || ''}
-              onChange={e => set(`${prefix}_festnetz`, e.target.value)} />
-          </Field>
-          <Field label="IBAN">
-            <input className="form-input" value={form[`${prefix}_iban`] || ''}
-              onChange={e => set(`${prefix}_iban`, e.target.value)} />
-          </Field>
-          <Field label="Beruf">
-            <input className="form-input" value={form[`${prefix}_beruf`] || ''}
-              onChange={e => set(`${prefix}_beruf`, e.target.value)} />
-          </Field>
-          <Field label="Höchster Abschluss">
-            <select className="form-select" value={form[`${prefix}_abschluss`] || ''}
-              onChange={e => set(`${prefix}_abschluss`, e.target.value)}>
-              <option value="">—</option>
-              {ABSCHLUSS.map(a => <option key={a}>{a}</option>)}
-            </select>
-          </Field>
-          <Field label="Arbeitgeber">
-            <input className="form-input" value={form[`${prefix}_arbeitgeber`] || ''}
-              onChange={e => set(`${prefix}_arbeitgeber`, e.target.value)} />
-          </Field>
-          <Field label="Arbeitsverhältnis">
-            <select className="form-select" value={form[`${prefix}_arbeitsverhaeltnis`] || ''}
-              onChange={e => set(`${prefix}_arbeitsverhaeltnis`, e.target.value)}>
-              <option value="">—</option>
-              {ARBEITSVERH.map(a => <option key={a}>{a}</option>)}
-            </select>
-          </Field>
-          <Field label="Gehalt netto (€)">
-            <input type="number" className="form-input" value={form[`${prefix}_gehalt_netto`] || ''}
-              onChange={e => set(`${prefix}_gehalt_netto`, e.target.value ? Number(e.target.value) : null)} />
-          </Field>
-          <Field label="Gehalt brutto (€)">
-            <input type="number" className="form-input" value={form[`${prefix}_gehalt_brutto`] || ''}
-              onChange={e => set(`${prefix}_gehalt_brutto`, e.target.value ? Number(e.target.value) : null)} />
-          </Field>
-          <Field label="GKV-Anbieter">
-            <input className="form-input" value={form[`${prefix}_gkv_anbieter`] || ''}
-              onChange={e => set(`${prefix}_gkv_anbieter`, e.target.value)} />
-          </Field>
-          <Field label="GKV-Stand">
-            <select className="form-select" value={form[`${prefix}_gkv_stand`] || ''}
-              onChange={e => set(`${prefix}_gkv_stand`, e.target.value)}>
-              <option value="">—</option>
-              {GKV_STAND.map(g => <option key={g}>{g}</option>)}
-            </select>
-          </Field>
-          <Field label="Raucher">
-            <select className="form-select" value={form[`${prefix}_raucher`] ?? 0}
-              onChange={e => set(`${prefix}_raucher`, Number(e.target.value))}>
-              <option value={0}>Nein</option>
-              <option value={1}>Ja</option>
-            </select>
-          </Field>
-          <Field label="Hobby">
-            <input className="form-input" value={form[`${prefix}_hobby`] || ''}
-              onChange={e => set(`${prefix}_hobby`, e.target.value)} />
-          </Field>
-          <Field label="Haustiere">
-            <input className="form-input" value={form[`${prefix}_haustiere`] || ''}
-              onChange={e => set(`${prefix}_haustiere`, e.target.value)} />
-          </Field>
-        </div></div>}
+        )}
       </div>
     )
   }
