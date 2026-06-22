@@ -465,15 +465,16 @@ function PersonForm({ prefix, title, defaultOpen = true, form, set }) {
 
             <Section label="Adresse" cols="2fr 90px 1fr">
               <Field label="Straße & Nr.">
-                <AddressAutocomplete
-                  value={g('strasse') || ''}
-                  onChange={v => set(`${prefix}_strasse`, v)}
-                  onSelect={({ strasse, plz, ort }) => {
-                    set(`${prefix}_strasse`, strasse)
-                    set(`${prefix}_plz`, plz)
-                    set(`${prefix}_ort`, ort)
-                  }}
-                />
+                <div style={{ display: 'flex', gap: 6 }}>
+                  <input className="form-input" value={g('strasse') || ''} onChange={s('strasse')} style={{ flex: 1 }} />
+                  <AddressAutocomplete
+                    onSelect={({ strasse, plz, ort }) => {
+                      set(`${prefix}_strasse`, strasse)
+                      set(`${prefix}_plz`, plz)
+                      set(`${prefix}_ort`, ort)
+                    }}
+                  />
+                </div>
               </Field>
               <Field label="PLZ">
                 <input className="form-input" value={g('plz') || ''} onChange={s('plz')} />
