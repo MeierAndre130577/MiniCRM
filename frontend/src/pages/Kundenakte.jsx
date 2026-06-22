@@ -380,41 +380,32 @@ export default function Kundenakte() {
 }
 
 // ── Stammdaten Tab ─────────────────────────────────────────────────────────────
-function StammdatenTab({ kunde, saveAll }) {
-  const [form, setForm] = useState(toForm(kunde))
-  const set = (k, v) => setForm(f => ({ ...f, [k]: v }))
+const ABSCHLUSS    = ['kein Abschluss', 'Schulabschluss', 'abgeschl. Berufsausbildung', 'staatl. anerkannte Berufsweiterbildung', 'Hochschulabschluss']
+const ARBEITSVERH  = ['Privatwirtschaft', 'Öffentlicher Dienst', 'Angehörige der Versicherungsbranche', 'Angehörige KFZ-Gewerbe']
+const GKV_STAND    = ['Arbeitnehmer/in', 'Freiwillig versicherte/r Arbeitnehmer/in', 'Auszubildende/r', 'Student/in', 'Rentner/in', 'Elternzeit', 'Selbstständige/r']
+const FAMILIENSTAND = ['ledig', 'verheiratet', 'geschieden', 'verwitwet', 'Lebenspartnerschaft']
 
-  async function handleSave(e) {
-    e.preventDefault()
-    await saveAll(form)
-  }
-
-  const ABSCHLUSS = ['kein Abschluss', 'Schulabschluss', 'abgeschl. Berufsausbildung', 'staatl. anerkannte Berufsweiterbildung', 'Hochschulabschluss']
-  const ARBEITSVERH = ['Privatwirtschaft', 'Öffentlicher Dienst', 'Angehörige der Versicherungsbranche', 'Angehörige KFZ-Gewerbe']
-  const GKV_STAND = ['Arbeitnehmer/in', 'Freiwillig versicherte/r Arbeitnehmer/in', 'Auszubildende/r', 'Student/in', 'Rentner/in', 'Elternzeit', 'Selbstständige/r']
-  const FAMILIENSTAND = ['ledig', 'verheiratet', 'geschieden', 'verwitwet', 'Lebenspartnerschaft']
-
-  function Section({ label, children, cols = '1fr 1fr 1fr' }) {
-    return (
+function Section({ label, children, cols = '1fr 1fr 1fr' }) {
+  return (
+    <div style={{
+      background: 'var(--section-bg)', borderRadius: 8, padding: '14px 16px 16px',
+    }}>
       <div style={{
-        background: 'var(--section-bg)', borderRadius: 8, padding: '14px 16px 16px',
-      }}>
-        <div style={{
-          fontSize: 10, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.12em',
-          color: '#4a4a5a', marginBottom: 12,
-        }}>{label}</div>
-        <div style={{ display: 'grid', gridTemplateColumns: cols, gap: '10px 16px' }}>
-          {children}
-        </div>
+        fontSize: 10, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.12em',
+        color: '#4a4a5a', marginBottom: 12,
+      }}>{label}</div>
+      <div style={{ display: 'grid', gridTemplateColumns: cols, gap: '10px 16px' }}>
+        {children}
       </div>
-    )
-  }
+    </div>
+  )
+}
 
-  function PersonForm({ prefix, title, defaultOpen = true }) {
-    const [open, setOpen] = useState(defaultOpen)
-    const g = (k) => form[`${prefix}_${k}`]
-    const s = (k) => (e) => set(`${prefix}_${k}`, e.target.value)
-    const sNum = (k) => (e) => set(`${prefix}_${k}`, e.target.value ? Number(e.target.value) : null)
+function PersonForm({ prefix, title, defaultOpen = true, form, set }) {
+  const [open, setOpen] = useState(defaultOpen)
+  const g = (k) => form[`${prefix}_${k}`]
+  const s = (k) => (e) => set(`${prefix}_${k}`, e.target.value)
+  const sNum = (k) => (e) => set(`${prefix}_${k}`, e.target.value ? Number(e.target.value) : null)
     return (
       <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
         <div onClick={() => setOpen(o => !o)} style={{
@@ -535,6 +526,15 @@ function StammdatenTab({ kunde, saveAll }) {
         )}
       </div>
     )
+}
+
+function StammdatenTab({ kunde, saveAll }) {
+  const [form, setForm] = useState(toForm(kunde))
+  const set = (k, v) => setForm(f => ({ ...f, [k]: v }))
+
+  async function handleSave(e) {
+    e.preventDefault()
+    await saveAll(form)
   }
 
   const p1Title = [form.p1_vorname, form.p1_nachname].filter(Boolean).join(' ') || 'Person 1'
@@ -608,9 +608,9 @@ function StammdatenTab({ kunde, saveAll }) {
           <span style={{ fontSize: 11, color: 'var(--muted)' }}>Persönliche Angaben des Kunden</span>
         </div>
         <div className="card" style={{ padding: '14px 16px', borderLeft: '3px solid #16a34a', display: 'flex', flexDirection: 'column', gap: 10 }}>
-          <PersonForm prefix="p1" title={p1Title} defaultOpen={true} />
+          <PersonForm prefix="p1" title={p1Title} defaultOpen={true} form={form} set={set} />
       {showP2
-        ? <PersonForm prefix="p2" title={p2Title} defaultOpen={true} />
+        ? <PersonForm prefix="p2" title={p2Title} defaultOpen={true} form={form} set={set} />
         : (
           <button type="button" onClick={() => setShowP2(true)} style={{
             display: 'flex', alignItems: 'center', gap: 8,
