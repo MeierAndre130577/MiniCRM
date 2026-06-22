@@ -407,6 +407,11 @@ function PersonForm({ prefix, title, defaultOpen = true, form, set }) {
   const g = (k) => form[`${prefix}_${k}`]
   const s = (k) => (e) => set(`${prefix}_${k}`, e.target.value)
   const sNum = (k) => (e) => set(`${prefix}_${k}`, e.target.value ? Number(e.target.value) : null)
+  const fb = (k) => {
+    const v = g(k)
+    const filled = v !== null && v !== undefined && v !== ''
+    return { background: filled ? 'var(--status-fu-bg)' : 'var(--status-ov-bg)' }
+  }
     return (
       <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
         <div onClick={() => setOpen(o => !o)} style={{
@@ -423,22 +428,22 @@ function PersonForm({ prefix, title, defaultOpen = true, form, set }) {
 
             <Section label="Identität" cols="120px 1fr 1fr">
               <Field label="Anrede">
-                <select className="form-select" value={g('anrede') || ''} onChange={s('anrede')}>
+                <select className="form-select" style={fb('anrede')} value={g('anrede') || ''} onChange={s('anrede')}>
                   <option value="">—</option>
                   <option>Herr</option><option>Frau</option>
                 </select>
               </Field>
               <Field label="Vorname">
-                <input className="form-input" value={g('vorname') || ''} onChange={s('vorname')} />
+                <input className="form-input" style={fb('vorname')} value={g('vorname') || ''} onChange={s('vorname')} />
               </Field>
               <Field label="Nachname">
-                <input className="form-input" value={g('nachname') || ''} onChange={s('nachname')} />
+                <input className="form-input" style={fb('nachname')} value={g('nachname') || ''} onChange={s('nachname')} />
               </Field>
               <Field label="Geburtsdatum">
-                <input type="date" className="form-input" value={g('geburtsdatum') || ''} onChange={s('geburtsdatum')} />
+                <input type="date" className="form-input" style={fb('geburtsdatum')} value={g('geburtsdatum') || ''} onChange={s('geburtsdatum')} />
               </Field>
               <Field label="Familienstand">
-                <select className="form-select" value={g('familienstand') || ''} onChange={s('familienstand')}>
+                <select className="form-select" style={fb('familienstand')} value={g('familienstand') || ''} onChange={s('familienstand')}>
                   <option value="">—</option>
                   {FAMILIENSTAND.map(f => <option key={f}>{f}</option>)}
                 </select>
@@ -453,25 +458,25 @@ function PersonForm({ prefix, title, defaultOpen = true, form, set }) {
 
             <Section label="Kontakt" cols="1fr 1fr 1fr">
               <Field label="E-Mail">
-                <input type="email" className="form-input" value={g('email') || ''} onChange={s('email')} />
+                <input type="email" className="form-input" style={fb('email')} value={g('email') || ''} onChange={s('email')} />
               </Field>
               <Field label="Handy">
-                <input className="form-input" value={g('handy') || ''} onChange={s('handy')} />
+                <input className="form-input" style={fb('handy')} value={g('handy') || ''} onChange={s('handy')} />
               </Field>
               <Field label="Festnetz">
-                <input className="form-input" value={g('festnetz') || ''} onChange={s('festnetz')} />
+                <input className="form-input" style={fb('festnetz')} value={g('festnetz') || ''} onChange={s('festnetz')} />
               </Field>
             </Section>
 
             <Section label="Adresse" cols="2fr 90px 1fr">
               <Field label="Straße & Nr.">
-                <input className="form-input" value={g('strasse') || ''} onChange={s('strasse')} />
+                <input className="form-input" style={fb('strasse')} value={g('strasse') || ''} onChange={s('strasse')} />
               </Field>
               <Field label="PLZ">
-                <input className="form-input" value={g('plz') || ''} onChange={s('plz')} />
+                <input className="form-input" style={fb('plz')} value={g('plz') || ''} onChange={s('plz')} />
               </Field>
               <Field label="Ort">
-                <input className="form-input" value={g('ort') || ''} onChange={s('ort')} />
+                <input className="form-input" style={fb('ort')} value={g('ort') || ''} onChange={s('ort')} />
               </Field>
               <div style={{ gridColumn: '1 / -1' }}>
                 <AddressAutocomplete
@@ -486,49 +491,49 @@ function PersonForm({ prefix, title, defaultOpen = true, form, set }) {
 
             <Section label="Beruf & Einkommen" cols="1fr 1fr 1fr">
               <Field label="Beruf">
-                <input className="form-input" value={g('beruf') || ''} onChange={s('beruf')} />
+                <input className="form-input" style={fb('beruf')} value={g('beruf') || ''} onChange={s('beruf')} />
               </Field>
               <Field label="Höchster Abschluss">
-                <select className="form-select" value={g('abschluss') || ''} onChange={s('abschluss')}>
+                <select className="form-select" style={fb('abschluss')} value={g('abschluss') || ''} onChange={s('abschluss')}>
                   <option value="">—</option>
                   {ABSCHLUSS.map(a => <option key={a}>{a}</option>)}
                 </select>
               </Field>
               <Field label="Arbeitsverhältnis">
-                <select className="form-select" value={g('arbeitsverhaeltnis') || ''} onChange={s('arbeitsverhaeltnis')}>
+                <select className="form-select" style={fb('arbeitsverhaeltnis')} value={g('arbeitsverhaeltnis') || ''} onChange={s('arbeitsverhaeltnis')}>
                   <option value="">—</option>
                   {ARBEITSVERH.map(a => <option key={a}>{a}</option>)}
                 </select>
               </Field>
               <Field label="Arbeitgeber">
-                <input className="form-input" value={g('arbeitgeber') || ''} onChange={s('arbeitgeber')} />
+                <input className="form-input" style={fb('arbeitgeber')} value={g('arbeitgeber') || ''} onChange={s('arbeitgeber')} />
               </Field>
               <Field label="Gehalt netto (€)">
-                <input type="number" className="form-input" value={g('gehalt_netto') || ''} onChange={sNum('gehalt_netto')} />
+                <input type="number" className="form-input" style={fb('gehalt_netto')} value={g('gehalt_netto') || ''} onChange={sNum('gehalt_netto')} />
               </Field>
               <Field label="Gehalt brutto (€)">
-                <input type="number" className="form-input" value={g('gehalt_brutto') || ''} onChange={sNum('gehalt_brutto')} />
+                <input type="number" className="form-input" style={fb('gehalt_brutto')} value={g('gehalt_brutto') || ''} onChange={sNum('gehalt_brutto')} />
               </Field>
               <Field label="GKV-Anbieter">
-                <input className="form-input" value={g('gkv_anbieter') || ''} onChange={s('gkv_anbieter')} />
+                <input className="form-input" style={fb('gkv_anbieter')} value={g('gkv_anbieter') || ''} onChange={s('gkv_anbieter')} />
               </Field>
               <Field label="GKV-Stand">
-                <select className="form-select" value={g('gkv_stand') || ''} onChange={s('gkv_stand')}>
+                <select className="form-select" style={fb('gkv_stand')} value={g('gkv_stand') || ''} onChange={s('gkv_stand')}>
                   <option value="">—</option>
                   {GKV_STAND.map(x => <option key={x}>{x}</option>)}
                 </select>
               </Field>
               <Field label="IBAN">
-                <input className="form-input" value={g('iban') || ''} onChange={s('iban')} />
+                <input className="form-input" style={fb('iban')} value={g('iban') || ''} onChange={s('iban')} />
               </Field>
             </Section>
 
             <Section label="Persönliches" cols="1fr 1fr">
               <Field label="Hobby">
-                <input className="form-input" value={g('hobby') || ''} onChange={s('hobby')} />
+                <input className="form-input" style={fb('hobby')} value={g('hobby') || ''} onChange={s('hobby')} />
               </Field>
               <Field label="Haustiere">
-                <input className="form-input" value={g('haustiere') || ''} onChange={s('haustiere')} />
+                <input className="form-input" style={fb('haustiere')} value={g('haustiere') || ''} onChange={s('haustiere')} />
               </Field>
             </Section>
 
