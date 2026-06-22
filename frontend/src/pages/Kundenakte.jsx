@@ -465,16 +465,7 @@ function PersonForm({ prefix, title, defaultOpen = true, form, set }) {
 
             <Section label="Adresse" cols="2fr 90px 1fr">
               <Field label="Straße & Nr.">
-                <div style={{ display: 'flex', gap: 6 }}>
-                  <input className="form-input" value={g('strasse') || ''} onChange={s('strasse')} style={{ flex: 1 }} />
-                  <AddressAutocomplete
-                    onSelect={({ strasse, plz, ort }) => {
-                      set(`${prefix}_strasse`, strasse)
-                      set(`${prefix}_plz`, plz)
-                      set(`${prefix}_ort`, ort)
-                    }}
-                  />
-                </div>
+                <input className="form-input" value={g('strasse') || ''} onChange={s('strasse')} />
               </Field>
               <Field label="PLZ">
                 <input className="form-input" value={g('plz') || ''} onChange={s('plz')} />
@@ -482,6 +473,15 @@ function PersonForm({ prefix, title, defaultOpen = true, form, set }) {
               <Field label="Ort">
                 <input className="form-input" value={g('ort') || ''} onChange={s('ort')} />
               </Field>
+              <div style={{ gridColumn: '1 / -1' }}>
+                <AddressAutocomplete
+                  onSelect={({ strasse, plz, ort }) => {
+                    set(`${prefix}_strasse`, strasse)
+                    set(`${prefix}_plz`, plz)
+                    set(`${prefix}_ort`, ort)
+                  }}
+                />
+              </div>
             </Section>
 
             <Section label="Beruf & Einkommen" cols="1fr 1fr 1fr">
