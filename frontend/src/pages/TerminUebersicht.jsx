@@ -88,10 +88,11 @@ export default function TerminUebersicht() {
         <button
           onClick={() => setBerater('alle')}
           style={{
-            padding: '6px 16px', borderRadius: 20, fontSize: 13, fontWeight: 600, cursor: 'pointer',
-            border: berater === 'alle' ? '2px solid var(--accent)' : '2px solid var(--line)',
-            background: berater === 'alle' ? 'var(--accent)' : 'transparent',
-            color: berater === 'alle' ? '#fff' : 'var(--text)',
+            padding: '6px 16px', borderRadius: 20, fontSize: 13, fontWeight: 700, cursor: 'pointer',
+            border: berater === 'alle' ? '2px solid #1d4ed8' : '2px solid var(--line)',
+            background: berater === 'alle' ? '#1d4ed8' : 'var(--card)',
+            color: berater === 'alle' ? '#fff' : 'var(--muted)',
+            boxShadow: berater === 'alle' ? '0 2px 8px rgba(29,78,216,0.35)' : 'none',
           }}
         >
           Alle ({rows.length})
@@ -101,10 +102,11 @@ export default function TerminUebersicht() {
             key={b}
             onClick={() => setBerater(b)}
             style={{
-              padding: '6px 16px', borderRadius: 20, fontSize: 13, fontWeight: 600, cursor: 'pointer',
-              border: berater === b ? '2px solid var(--accent)' : '2px solid var(--line)',
-              background: berater === b ? 'var(--accent)' : 'transparent',
-              color: berater === b ? '#fff' : 'var(--text)',
+              padding: '6px 16px', borderRadius: 20, fontSize: 13, fontWeight: 700, cursor: 'pointer',
+              border: berater === b ? '2px solid #1d4ed8' : '2px solid var(--line)',
+              background: berater === b ? '#1d4ed8' : 'var(--card)',
+              color: berater === b ? '#fff' : 'var(--muted)',
+              boxShadow: berater === b ? '0 2px 8px rgba(29,78,216,0.35)' : 'none',
             }}
           >
             {b.split(' ')[0]} ({counts[b] || 0})
