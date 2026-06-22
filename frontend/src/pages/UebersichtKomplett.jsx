@@ -101,8 +101,8 @@ function PersonCard({ k, prefix, id }) {
 export default function UebersichtKomplett({ kunde, cats, contracts, id }) {
   const navigate = useNavigate()
   const appts = kunde.appointments || []
-  const filledContracts = Object.entries(KATEGORIE_META).filter(([k]) =>
-    contracts[k]?.gesellschaft || contracts[k]?.police_nr || contracts[k]?.beitrag_neu
+  const filledContracts = Object.entries(KATEGORIE_META).flatMap(([k, m]) =>
+    (contracts[k] || []).map(c => ({ ...c, _key: k, _meta: m }))
   )
 
   const einnahmen = (Number(kunde.hhr_einnahmen_gehalt) || 0)
@@ -226,19 +226,16 @@ export default function UebersichtKomplett({ kunde, cats, contracts, id }) {
                 </tr>
               </thead>
               <tbody>
-                {filledContracts.map(([key, meta]) => {
-                  const c = contracts[key]
-                  return (
-                    <tr key={key} onClick={() => navigate(`/kunden/${id}?tab=vertraege`)} style={{ cursor: 'pointer' }}>
-                      <td><span style={{ fontSize: 14 }}>{meta.icon}</span> {meta.label}</td>
-                      <td>{c.gesellschaft || '—'}</td>
-                      <td style={{ color: 'var(--muted)', fontSize: 12 }}>{c.police_nr || '—'}</td>
-                      <td style={{ fontSize: 12 }}>{fmtDate(c.ablaufdatum) || '—'}</td>
-                      <td style={{ color: 'var(--muted)' }}>{fmtEuro(c.beitrag_alt) || '—'}</td>
-                      <td style={{ fontWeight: 700, color: 'var(--green)' }}>{fmtEuro(c.beitrag_neu) || '—'}</td>
-                    </tr>
-                  )
-                })}
+                {filledContracts.map(c => (
+                  <tr key={c.id} onClick={() => navigate(`/kunden/${id}?tab=vertraege`)} style={{ cursor: 'pointer' }}>
+                    <td><span style={{ fontSize: 14 }}>{c._meta.icon}</span> {c._meta.label}</td>
+                    <td>{c.gesellschaft || '—'}</td>
+                    <td style={{ color: 'var(--muted)', fontSize: 12 }}>{c.police_nr || '—'}</td>
+                    <td style={{ fontSize: 12 }}>{fmtDate(c.ablaufdatum) || '—'}</td>
+                    <td style={{ color: 'var(--muted)' }}>{fmtEuro(c.beitrag_alt) || '—'}</td>
+                    <td style={{ fontWeight: 700, color: 'var(--green)' }}>{fmtEuro(c.beitrag_neu) || '—'}</td>
+                  </tr>
+                ))}
               </tbody>
             </table>
           </div>

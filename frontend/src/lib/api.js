@@ -26,8 +26,12 @@ export const customers = {
     request('DELETE', `/customers/${id}/appointments/${apptId}`),
   getContracts: (id) =>
     request('GET', `/customers/${id}/contracts`),
-  upsertContract: (id, cat, data) =>
-    request('PUT', `/customers/${id}/contracts/${cat}`, data),
+  createContract: (id, cat, data) =>
+    request('POST', `/customers/${id}/contracts/${cat}`, data),
+  updateContract: (id, contractId, data) =>
+    request('PUT', `/customers/${id}/contracts/${contractId}`, data),
+  deleteContract: (id, contractId) =>
+    request('DELETE', `/customers/${id}/contracts/${contractId}`),
   exportExcelUrl: (id) => `${BASE}/customers/${id}/export/excel`,
 }
 

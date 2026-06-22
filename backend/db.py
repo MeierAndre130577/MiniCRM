@@ -193,8 +193,7 @@ _TABLES = [
         absicherung_alt TEXT DEFAULT '',
         beitrag_neu     DOUBLE PRECISION,
         absicherung_neu TEXT DEFAULT '',
-        updated_at      TIMESTAMPTZ DEFAULT NOW(),
-        UNIQUE(customer_id, category)
+        updated_at      TIMESTAMPTZ DEFAULT NOW()
     )
     """,
 ]
@@ -204,3 +203,6 @@ def init_db():
     with db() as conn:
         for sql in _TABLES:
             conn.execute(sql)
+        conn.execute("""
+            ALTER TABLE contracts DROP CONSTRAINT IF EXISTS contracts_customer_id_category_key
+        """)

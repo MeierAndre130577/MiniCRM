@@ -337,42 +337,51 @@ class ContractUpsert(BaseModel):
 def get_contracts(customer_id: int):
     with db() as conn:
         rows = conn.execute(
-            "SELECT * FROM contracts WHERE customer_id = %s", (customer_id,)
+            "SELECT * FROM contracts WHERE customer_id = %s ORDER BY id", (customer_id,)
         ).fetchall()
-        result = {r["category"]: dict(r) for r in rows}
-        for cat in CATEGORIES:
-            if cat not in result:
-                result[cat] = {"category": cat, "gesellschaft": "", "police_nr": "",
-                               "ablaufdatum": "", "beitrag_alt": None,
-                               "absicherung_alt": "", "beitrag_neu": None, "absicherung_neu": ""}
+        result = {cat: [] for cat in CATEGORIES}
+        for r in rows:
+            cat = r["category"]
+            if cat in result:
+                result[cat].append(dict(r))
         return result
 
 
-@app.put("/api/customers/{customer_id}/contracts/{category}")
-def upsert_contract(customer_id: int, category: str, data: ContractUpsert):
+@app.post("/api/customers/{customer_id}/contracts/{category}", status_code=201)
+def create_contract(customer_id: int, category: str, data: ContractUpsert):
     if category not in CATEGORIES:
         raise HTTPException(400, f"Unbekannte Kategorie: {category}")
     with db() as conn:
-        conn.execute("""
+        cur = conn.execute("""
             INSERT INTO contracts (customer_id, category, gesellschaft, police_nr, ablaufdatum,
                                    beitrag_alt, absicherung_alt, beitrag_neu, absicherung_neu, updated_at)
-            VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s, NOW())
-            ON CONFLICT (customer_id, category) DO UPDATE SET
-                gesellschaft    = EXCLUDED.gesellschaft,
-                police_nr       = EXCLUDED.police_nr,
-                ablaufdatum     = EXCLUDED.ablaufdatum,
-                beitrag_alt     = EXCLUDED.beitrag_alt,
-                absicherung_alt = EXCLUDED.absicherung_alt,
-                beitrag_neu     = EXCLUDED.beitrag_neu,
-                absicherung_neu = EXCLUDED.absicherung_neu,
-                updated_at      = NOW()
+            VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s, NOW()) RETURNING id
         """, (customer_id, category, data.gesellschaft, data.police_nr, data.ablaufdatum,
               data.beitrag_alt, data.absicherung_alt, data.beitrag_neu, data.absicherung_neu))
-        row = conn.execute(
-            "SELECT * FROM contracts WHERE customer_id = %s AND category = %s",
-            (customer_id, category)
-        ).fetchone()
+        new_id = cur.fetchone()["id"]
+        return dict(conn.execute("SELECT * FROM contracts WHERE id = %s", (new_id,)).fetchone())
+
+
+@app.put("/api/customers/{customer_id}/contracts/{contract_id}")
+def update_contract(customer_id: int, contract_id: int, data: ContractUpsert):
+    with db() as conn:
+        conn.execute("""
+            UPDATE contracts SET gesellschaft=%s, police_nr=%s, ablaufdatum=%s,
+                beitrag_alt=%s, absicherung_alt=%s, beitrag_neu=%s, absicherung_neu=%s, updated_at=NOW()
+            WHERE id=%s AND customer_id=%s
+        """, (data.gesellschaft, data.police_nr, data.ablaufdatum,
+              data.beitrag_alt, data.absicherung_alt, data.beitrag_neu, data.absicherung_neu,
+              contract_id, customer_id))
+        row = conn.execute("SELECT * FROM contracts WHERE id = %s", (contract_id,)).fetchone()
+        if not row:
+            raise HTTPException(404, "Vertrag nicht gefunden")
         return dict(row)
+
+
+@app.delete("/api/customers/{customer_id}/contracts/{contract_id}", status_code=204)
+def delete_contract(customer_id: int, contract_id: int):
+    with db() as conn:
+        conn.execute("DELETE FROM contracts WHERE id=%s AND customer_id=%s", (contract_id, customer_id))
 
 
 # ── Excel Export ──────────────────────────────────────────────────────────────

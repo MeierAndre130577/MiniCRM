@@ -19,14 +19,10 @@ const KATEGORIE_META = {
   immobilien:       { icon: '🏢', label: 'Immobilien' },
 }
 
-const EMPTY = {
+const EMPTY_FORM = {
   gesellschaft: '', police_nr: '', ablaufdatum: '',
   beitrag_alt: '', absicherung_alt: '',
   beitrag_neu: '', absicherung_neu: '',
-}
-
-function hasDaten(c) {
-  return !!(c?.gesellschaft || c?.police_nr || c?.beitrag_alt || c?.beitrag_neu)
 }
 
 function fmtEuro(val) {
@@ -35,12 +31,19 @@ function fmtEuro(val) {
 }
 
 export default function VertraegeTab({ contracts, setContracts, customerId }) {
-  const [editCat, setEditCat] = useState(null)
-  const [form, setForm]       = useState(EMPTY)
-  const [saving, setSaving]   = useState(false)
+  const [editState, setEditState] = useState(null) // { cat, contractId } — null = closed
+  const [form, setForm]           = useState(EMPTY_FORM)
+  const [saving, setSaving]       = useState(false)
 
-  function openEdit(catKey) {
-    const c = contracts[catKey] || {}
+  const totalFilled = Object.values(contracts).reduce((n, list) => n + (list?.length || 0), 0)
+  const meta = editState ? KATEGORIE_META[editState.cat] : null
+
+  function openNew(cat) {
+    setForm(EMPTY_FORM)
+    setEditState({ cat, contractId: null })
+  }
+
+  function openEdit(cat, c) {
     setForm({
       gesellschaft:    c.gesellschaft    || '',
       police_nr:       c.police_nr       || '',
@@ -50,7 +53,7 @@ export default function VertraegeTab({ contracts, setContracts, customerId }) {
       beitrag_neu:     c.beitrag_neu     ?? '',
       absicherung_neu: c.absicherung_neu || '',
     })
-    setEditCat(catKey)
+    setEditState({ cat, contractId: c.id })
   }
 
   async function handleSave() {
@@ -60,14 +63,24 @@ export default function VertraegeTab({ contracts, setContracts, customerId }) {
         gesellschaft:    form.gesellschaft,
         police_nr:       form.police_nr,
         ablaufdatum:     form.ablaufdatum,
-        beitrag_alt:     form.beitrag_alt !== '' ? Number(form.beitrag_alt) : null,
+        beitrag_alt:     form.beitrag_alt     !== '' ? Number(form.beitrag_alt)     : null,
         absicherung_alt: form.absicherung_alt,
-        beitrag_neu:     form.beitrag_neu !== '' ? Number(form.beitrag_neu) : null,
+        beitrag_neu:     form.beitrag_neu     !== '' ? Number(form.beitrag_neu)     : null,
         absicherung_neu: form.absicherung_neu,
       }
-      const updated = await customers.upsertContract(customerId, editCat, payload)
-      setContracts(prev => ({ ...prev, [editCat]: updated }))
-      setEditCat(null)
+      const { cat, contractId } = editState
+      let updated
+      if (contractId === null) {
+        updated = await customers.createContract(customerId, cat, payload)
+        setContracts(prev => ({ ...prev, [cat]: [...(prev[cat] || []), updated] }))
+      } else {
+        updated = await customers.updateContract(customerId, contractId, payload)
+        setContracts(prev => ({
+          ...prev,
+          [cat]: prev[cat].map(c => c.id === contractId ? updated : c),
+        }))
+      }
+      setEditState(null)
     } catch (e) {
       alert(e.message)
     } finally {
@@ -75,74 +88,117 @@ export default function VertraegeTab({ contracts, setContracts, customerId }) {
     }
   }
 
-  const filledCount = Object.keys(KATEGORIE_META).filter(k => hasDaten(contracts[k])).length
-  const meta = editCat ? KATEGORIE_META[editCat] : null
+  async function handleDelete(cat, contractId) {
+    if (!confirm('Vertrag löschen?')) return
+    try {
+      await customers.deleteContract(customerId, contractId)
+      setContracts(prev => ({
+        ...prev,
+        [cat]: prev[cat].filter(c => c.id !== contractId),
+      }))
+    } catch (e) {
+      alert(e.message)
+    }
+  }
 
   return (
     <>
       <div style={{ marginBottom: 16, display: 'flex', alignItems: 'center', gap: 10 }}>
         <span style={{ fontSize: 13, color: 'var(--muted)' }}>
-          {filledCount} von {Object.keys(KATEGORIE_META).length} Kategorien erfasst
+          {totalFilled} Vertrag{totalFilled !== 1 ? 'verträge' : ''} erfasst
         </span>
-        {filledCount > 0 && (
-          <span className="badge badge-green">{filledCount} erfasst</span>
+        {totalFilled > 0 && (
+          <span className="badge badge-green">{totalFilled} erfasst</span>
         )}
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10 }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
         {Object.entries(KATEGORIE_META).map(([key, m]) => {
-          const c   = contracts[key]
-          const has = hasDaten(c)
+          const list = contracts[key] || []
+          const has  = list.length > 0
           return (
-            <div
-              key={key}
-              onClick={() => openEdit(key)}
-              style={{
-                background: 'var(--white)',
-                border: has ? '1px solid var(--green)' : '1px dashed var(--line)',
-                borderLeft: has ? '3px solid var(--green)' : '3px dashed var(--line)',
-                borderRadius: 10,
-                padding: '12px 14px',
-                cursor: 'pointer',
-                transition: 'box-shadow .15s',
-              }}
-              onMouseEnter={e => e.currentTarget.style.boxShadow = 'var(--shadow)'}
-              onMouseLeave={e => e.currentTarget.style.boxShadow = 'none'}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: has ? 8 : 4 }}>
+            <div key={key} style={{
+              background: 'var(--white)',
+              border: has ? '1px solid var(--green)' : '1px dashed var(--line)',
+              borderLeft: has ? '3px solid var(--green)' : '3px dashed var(--line)',
+              borderRadius: 10,
+              padding: '10px 14px',
+            }}>
+              {/* Kategorie-Header */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: has ? 8 : 0 }}>
                 <span style={{ fontSize: 18 }}>{m.icon}</span>
                 <span style={{ fontWeight: 700, fontSize: 13 }}>{m.label}</span>
                 {has && (
-                  <span style={{ marginLeft: 'auto', width: 8, height: 8, borderRadius: '50%', background: 'var(--green)', flexShrink: 0 }} />
+                  <span style={{ marginLeft: 4, fontSize: 11, color: 'var(--green)', fontWeight: 600 }}>
+                    {list.length} Vertrag{list.length > 1 ? 'verträge' : ''}
+                  </span>
                 )}
+                <button type="button" onClick={() => openNew(key)}
+                  style={{
+                    marginLeft: 'auto', fontSize: 11, padding: '3px 10px',
+                    border: '1px solid var(--line)', borderRadius: 6,
+                    background: 'transparent', cursor: 'pointer', color: 'var(--muted)',
+                  }}>
+                  + Vertrag
+                </button>
               </div>
-              {has ? (
-                <div style={{ fontSize: 12 }}>
-                  {c.gesellschaft && <div style={{ fontWeight: 600, marginBottom: 2 }}>{c.gesellschaft}</div>}
-                  {c.police_nr    && <div style={{ color: 'var(--muted)' }}>Police: {c.police_nr}</div>}
-                  <div style={{ display: 'flex', gap: 10, marginTop: 4, flexWrap: 'wrap' }}>
-                    {fmtEuro(c.beitrag_alt) && (
-                      <span style={{ color: 'var(--muted)' }}>Alt: {fmtEuro(c.beitrag_alt)}</span>
-                    )}
-                    {fmtEuro(c.beitrag_neu) && (
-                      <span style={{ color: 'var(--green)', fontWeight: 600 }}>Neu: {fmtEuro(c.beitrag_neu)}</span>
-                    )}
-                  </div>
+
+              {/* Vertrags-Liste */}
+              {has && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                  {list.map((c, i) => (
+                    <div key={c.id} style={{
+                      background: 'var(--section-bg)', borderRadius: 7,
+                      padding: '8px 12px', fontSize: 12,
+                      display: 'flex', alignItems: 'flex-start', gap: 10,
+                    }}>
+                      <div style={{ flex: 1 }}>
+                        {c.gesellschaft && <div style={{ fontWeight: 700, marginBottom: 2 }}>{c.gesellschaft}</div>}
+                        {c.police_nr    && <div style={{ color: 'var(--muted)' }}>Police: {c.police_nr}</div>}
+                        <div style={{ display: 'flex', gap: 12, marginTop: 3, flexWrap: 'wrap' }}>
+                          {fmtEuro(c.beitrag_alt) && (
+                            <span style={{ color: 'var(--muted)' }}>Alt: {fmtEuro(c.beitrag_alt)}</span>
+                          )}
+                          {fmtEuro(c.beitrag_neu) && (
+                            <span style={{ color: 'var(--green)', fontWeight: 600 }}>Neu: {fmtEuro(c.beitrag_neu)}</span>
+                          )}
+                          {c.ablaufdatum && (
+                            <span style={{ color: 'var(--muted)' }}>Ablauf: {new Date(c.ablaufdatum).toLocaleDateString('de-DE')}</span>
+                          )}
+                        </div>
+                      </div>
+                      <div style={{ display: 'flex', gap: 4, flexShrink: 0 }}>
+                        <button type="button" onClick={() => openEdit(key, c)}
+                          style={{ fontSize: 11, padding: '2px 8px', border: '1px solid var(--line)', borderRadius: 5, background: 'transparent', cursor: 'pointer', color: 'var(--muted)' }}>
+                          ✏
+                        </button>
+                        <button type="button" onClick={() => handleDelete(key, c.id)}
+                          style={{ fontSize: 11, padding: '2px 8px', border: '1px solid var(--line)', borderRadius: 5, background: 'transparent', cursor: 'pointer', color: 'var(--red)' }}>
+                          ✕
+                        </button>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              ) : (
-                <div style={{ fontSize: 11, color: 'var(--muted)' }}>+ Vertrag erfassen</div>
+              )}
+
+              {!has && (
+                <div style={{ fontSize: 11, color: 'var(--muted)' }}>Noch kein Vertrag erfasst</div>
               )}
             </div>
           )
         })}
       </div>
 
-      {editCat && (
-        <div className="modal-overlay" onClick={() => setEditCat(null)}>
+      {/* Modal */}
+      {editState && (
+        <div className="modal-overlay" onClick={() => setEditState(null)}>
           <div className="modal" onClick={e => e.stopPropagation()}>
             <div className="modal-header">
-              <span className="modal-title">{meta.icon} {meta.label} — Vertrag</span>
-              <button className="btn btn-ghost btn-sm" onClick={() => setEditCat(null)}>✕</button>
+              <span className="modal-title">
+                {meta.icon} {meta.label} — {editState.contractId ? 'Vertrag bearbeiten' : 'Neuer Vertrag'}
+              </span>
+              <button className="btn btn-ghost btn-sm" onClick={() => setEditState(null)}>✕</button>
             </div>
             <div className="modal-body">
               <div className="grid-2">
@@ -206,7 +262,7 @@ export default function VertraegeTab({ contracts, setContracts, customerId }) {
               </div>
             </div>
             <div className="modal-footer">
-              <button type="button" className="btn btn-ghost" onClick={() => setEditCat(null)}>
+              <button type="button" className="btn btn-ghost" onClick={() => setEditState(null)}>
                 Abbrechen
               </button>
               <button type="button" className="btn btn-primary" onClick={handleSave} disabled={saving}>
