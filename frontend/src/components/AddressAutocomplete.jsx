@@ -2,6 +2,27 @@ import { useState, useEffect, useRef } from 'react'
 
 const API_KEY = import.meta.env.VITE_GEOAPIFY_KEY
 
+export async function validateAddress(text) {
+  if (!API_KEY || !text || text.length < 5) return null
+  try {
+    const url = `https://api.geoapify.com/v1/geocode/search?text=${encodeURIComponent(text)}&lang=de&filter=countrycode:de&limit=1&apiKey=${API_KEY}`
+    const res  = await fetch(url)
+    const data = await res.json()
+    const feat = data.features?.[0]
+    if (!feat) return null
+    const conf = feat.properties.rank?.confidence || 0
+    if (conf < 0.8) return null
+    const p = feat.properties
+    return {
+      strasse: [p.street, p.housenumber].filter(Boolean).join(' '),
+      plz:     p.postcode || '',
+      ort:     p.city || p.municipality || p.county || '',
+    }
+  } catch {
+    return null
+  }
+}
+
 export default function AddressAutocomplete({ value, onChange, onSelect, placeholder = 'Straße & Hausnummer' }) {
   const [suggestions, setSuggestions] = useState([])
   const [open, setOpen]               = useState(false)

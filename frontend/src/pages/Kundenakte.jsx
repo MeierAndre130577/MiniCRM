@@ -1,8 +1,8 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom'
-import { customers } from '../lib/api'
+import { customers, tasks } from '../lib/api'
 import VertraegeTab from './VertraegeTab'
-import AddressAutocomplete from '../components/AddressAutocomplete'
+import AddressAutocomplete, { validateAddress } from '../components/AddressAutocomplete'
 
 const KONTAKTQUELLEN = ['Dummy', 'Lead', 'Empfehlung', 'Bestandskunde', 'Sonstiges']
 
@@ -543,7 +543,39 @@ function StammdatenTab({ kunde, saveAll }) {
 
   async function handleSave(e) {
     e.preventDefault()
-    await saveAll(form)
+    let patch = { ...form }
+    const unclear = []
+
+    for (const prefix of ['p1', 'p2']) {
+      const strasse = form[`${prefix}_strasse`]
+      const plz     = form[`${prefix}_plz`]
+      const ort     = form[`${prefix}_ort`]
+      if (strasse && (!plz || !ort)) {
+        const validated = await validateAddress(strasse)
+        if (validated) {
+          patch[`${prefix}_strasse`] = validated.strasse
+          patch[`${prefix}_plz`]     = validated.plz
+          patch[`${prefix}_ort`]     = validated.ort
+          set(`${prefix}_plz`, validated.plz)
+          set(`${prefix}_ort`, validated.ort)
+        } else {
+          const name = [form[`${prefix}_vorname`], form[`${prefix}_nachname`]].filter(Boolean).join(' ')
+          unclear.push({ name, strasse })
+        }
+      }
+    }
+
+    await saveAll(patch)
+
+    for (const { name, strasse } of unclear) {
+      try {
+        await tasks.create({
+          type: 'manual',
+          title: `Adresse prüfen: ${name || 'Kunde'} — "${strasse}"`,
+          customer_id: kunde.id,
+        })
+      } catch {}
+    }
   }
 
   const p1Title = [form.p1_vorname, form.p1_nachname].filter(Boolean).join(' ') || 'Person 1'
