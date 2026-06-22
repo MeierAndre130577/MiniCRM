@@ -119,13 +119,24 @@ export default function Kundenliste() {
     }))
   }
 
-  function statusBadge(besprochen = 0, offen = 0) {
-    const rest = 15 - besprochen - offen
+  function statusBadge(besprochen = 0, offen = 0, keinInteresse = 0) {
+    const rest = 15 - besprochen - offen - keinInteresse
+    const pills = [
+      { n: besprochen,   bg: '#16a34a', label: 'Besprochen' },
+      { n: offen,        bg: '#f97316', label: 'Offen' },
+      { n: keinInteresse,bg: '#dc2626', label: 'Kein Interesse' },
+      { n: rest,         bg: '#9ca3af', label: 'Neu' },
+    ].filter(p => p.n > 0)
     return (
-      <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
-        {besprochen > 0 && <span className="badge badge-green">{besprochen} besprochen</span>}
-        {offen > 0      && <span className="badge badge-orange">{offen} offen</span>}
-        {rest > 0       && <span className="badge badge-gray">{rest} neu</span>}
+      <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap', alignItems: 'center' }}>
+        {pills.map(p => (
+          <span key={p.label} title={p.label} style={{
+            display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+            minWidth: 28, height: 20, padding: '0 8px',
+            borderRadius: 20, fontSize: 11, fontWeight: 700,
+            background: p.bg, color: '#fff',
+          }}>{p.n}</span>
+        ))}
       </div>
     )
   }
@@ -219,7 +230,7 @@ export default function Kundenliste() {
                       </div>
                     </td>
                     <td style={{ color: 'var(--muted)', fontSize: 12 }}>{c.berater || '—'}</td>
-                    <td>{statusBadge(c.besprochen, c.offen)}</td>
+                    <td>{statusBadge(c.besprochen, c.offen, c.kein_interesse)}</td>
                     <td style={{ fontSize: 12 }}>
                       {c.folgetermin_datum
                         ? new Date(c.folgetermin_datum).toLocaleDateString('de-DE')

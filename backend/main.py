@@ -168,7 +168,9 @@ def list_customers():
                    (SELECT COUNT(*) FROM customer_categories cc
                     WHERE cc.customer_id = c.id AND cc.status = 'besprochen') AS besprochen,
                    (SELECT COUNT(*) FROM customer_categories cc
-                    WHERE cc.customer_id = c.id AND cc.status = 'offen') AS offen
+                    WHERE cc.customer_id = c.id AND cc.status = 'offen') AS offen,
+                   (SELECT COUNT(*) FROM customer_categories cc
+                    WHERE cc.customer_id = c.id AND cc.status = 'kein_interesse') AS kein_interesse
             FROM customers c
             ORDER BY c.updated_at DESC
         """).fetchall()
