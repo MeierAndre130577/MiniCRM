@@ -254,12 +254,9 @@ export default function Kundenliste() {
                       {c.p2_vorname && (
                         <div style={{ fontSize: 11, color: 'var(--muted)' }}>+ {c.p2_nachname} {c.p2_vorname}</div>
                       )}
-                      {c.p1_strasse && (
-                        <div style={{ fontSize: 11, color: 'var(--muted)', marginTop: 3 }}>{c.p1_strasse}</div>
-                      )}
-                      {(c.p1_plz || c.p1_ort) && (
-                        <div style={{ fontSize: 11, color: 'var(--muted)' }}>
-                          {[c.p1_plz, c.p1_ort].filter(Boolean).join(' ')}
+                      {(c.p1_strasse || c.p1_plz || c.p1_ort) && (
+                        <div style={{ fontSize: 11, color: 'var(--muted)', marginTop: 3 }}>
+                          {[c.p1_strasse, c.p1_plz, c.p1_ort].filter(Boolean).join(' ')}
                         </div>
                       )}
                     </td>
