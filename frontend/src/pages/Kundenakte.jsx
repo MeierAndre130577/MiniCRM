@@ -382,7 +382,7 @@ function StammdatenTab({ kunde, saveAll }) {
   function Section({ label, children, cols = '1fr 1fr 1fr' }) {
     return (
       <div style={{
-        background: 'var(--bg)', borderRadius: 8, padding: '14px 16px 16px',
+        background: '#e8eaed', borderRadius: 8, padding: '14px 16px 16px',
       }}>
         <div style={{
           fontSize: 10, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.12em',
@@ -592,7 +592,7 @@ function StammdatenTab({ kunde, saveAll }) {
           }}>Kundendaten</span>
           <span style={{ fontSize: 11, color: 'var(--muted)' }}>Persönliche Angaben des Kunden</span>
         </div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+        <div className="card" style={{ padding: '14px 16px', borderLeft: '3px solid #16a34a', display: 'flex', flexDirection: 'column', gap: 10 }}>
           <PersonForm prefix="p1" title={p1Title} defaultOpen={true} />
       {showP2
         ? <PersonForm prefix="p2" title={p2Title} defaultOpen={true} />
