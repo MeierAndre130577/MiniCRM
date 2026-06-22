@@ -156,6 +156,24 @@ def health():
     return {"ok": True}
 
 
+@app.get("/api/termine-uebersicht")
+def termine_uebersicht():
+    with db() as conn:
+        rows = conn.execute("""
+            SELECT c.id, c.p1_vorname, c.p1_nachname, c.berater,
+                   c.folgetermin_datum, c.folgetermin_notizen,
+                   c.p1_handy, c.p1_email,
+                   (SELECT a.status FROM appointments a
+                    WHERE a.customer_id = c.id ORDER BY a.created_at DESC LIMIT 1) AS letzter_status,
+                   (SELECT a.datum FROM appointments a
+                    WHERE a.customer_id = c.id ORDER BY a.created_at DESC LIMIT 1) AS letzter_termin_datum
+            FROM customers c
+            WHERE c.folgetermin_datum IS NOT NULL AND c.folgetermin_datum != ''
+            ORDER BY c.folgetermin_datum ASC
+        """).fetchall()
+        return [dict(r) for r in rows]
+
+
 @app.get("/api/customers")
 def list_customers():
     with db() as conn:

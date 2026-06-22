@@ -44,6 +44,10 @@ export const tasks = {
   delete: (id)   => request('DELETE', `/tasks/${id}`),
 }
 
+export const termine = {
+  uebersicht: () => request('GET', '/termine-uebersicht'),
+}
+
 export const leads = {
   import:          (raw_email)   => request('POST', '/leads/import', { raw_email }),
   applyMapping:    ()            => request('POST', '/leads/apply-mapping'),

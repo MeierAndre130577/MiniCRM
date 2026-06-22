@@ -5,6 +5,7 @@ import Kundenakte         from './pages/Kundenakte'
 import AdminEinstellungen from './pages/AdminEinstellungen'
 import Aufgaben           from './pages/Aufgaben'
 import TestSimulation     from './pages/TestSimulation'
+import TerminUebersicht   from './pages/TerminUebersicht'
 import { tasks } from './lib/api'
 
 const KUNDE_TABS = [
@@ -76,6 +77,11 @@ export default function App() {
         {/* Admin — immer sichtbar, visuell abgegrenzt */}
         <div style={{ marginTop: 'auto', paddingTop: 12, borderTop: '2px solid var(--line)' }}>
           <div className="nav-group-label">Admin</div>
+          <NavLink to="/termine-uebersicht"
+            className={({ isActive }) => `nav-item${isActive ? ' active' : ''}`}>
+            <span className="icon">📅</span>
+            Terminübersicht
+          </NavLink>
           <NavLink to="/aufgaben"
             className={({ isActive }) => `nav-item${isActive ? ' active' : ''}`}>
             <span className="icon">✅</span>
@@ -109,6 +115,7 @@ export default function App() {
           <Route path="/aufgaben"       element={<Aufgaben />} />
           <Route path="/einstellungen"   element={<AdminEinstellungen />} />
           <Route path="/test-simulation" element={<TestSimulation />} />
+          <Route path="/termine-uebersicht" element={<TerminUebersicht />} />
         </Routes>
       </main>
     </div>
