@@ -517,38 +517,72 @@ function StammdatenTab({ kunde, saveAll }) {
   const p2Title = [form.p2_vorname, form.p2_nachname].filter(Boolean).join(' ') || 'Person 2'
 
   return (
-    <form onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-      {/* Kontaktquelle */}
-      <div className="card" style={{ padding: '14px 16px' }}>
-        <div className="section-label" style={{ marginBottom: 10 }}>Kontaktquelle</div>
-        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 8 }}>
-          {KONTAKTQUELLEN.map(k => {
-            const kqArr = Array.isArray(form.kontaktquelle) ? form.kontaktquelle : []
-            const active = kqArr.includes(k)
-            const c = TAG_COLORS[k] || TAG_COLORS.Sonstiges
-            return (
-              <button key={k} type="button"
-                onClick={() => set('kontaktquelle', active ? kqArr.filter(x => x !== k) : [...kqArr, k])}
-                style={{
-                  padding: '5px 12px', borderRadius: 20, fontSize: 13, cursor: 'pointer',
-                  border: active ? `2px solid ${c.color}` : '1px solid var(--line)',
-                  background: active ? c.bg : 'var(--white)',
-                  color: active ? c.color : 'var(--text)',
-                  fontWeight: active ? 700 : 400,
-                }}>
-                {k}
-              </button>
-            )
-          })}
+    <form onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+
+      {/* ── Agenturdaten ── */}
+      <div>
+        <div style={{
+          display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8,
+        }}>
+          <span style={{
+            fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.08em',
+            color: '#fff', background: '#1d4ed8', padding: '3px 10px', borderRadius: 20,
+          }}>Agenturdaten</span>
+          <span style={{ fontSize: 11, color: 'var(--muted)' }}>Intern — wird von der Agentur gepflegt</span>
         </div>
-        {(Array.isArray(form.kontaktquelle) ? form.kontaktquelle : []).includes('Sonstiges') && (
-          <input className="form-input" placeholder="Bitte beschreiben…"
-            value={form.kontaktquelle_sonstiges || ''}
-            onChange={e => set('kontaktquelle_sonstiges', e.target.value)} />
-        )}
+        <div className="card" style={{ padding: '14px 16px', borderLeft: '3px solid #1d4ed8' }}>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16, alignItems: 'flex-start' }}>
+            <div style={{ minWidth: 200 }}>
+              <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--muted)', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '.06em' }}>Berater</div>
+              <select className="form-select" value={form.berater || ''}
+                onChange={e => set('berater', e.target.value)}>
+                <option value="">— auswählen —</option>
+                {BERATER.map(b => <option key={b}>{b}</option>)}
+              </select>
+            </div>
+            <div style={{ flex: 1, minWidth: 240 }}>
+              <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--muted)', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '.06em' }}>Kontaktquelle</div>
+              <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 6 }}>
+                {KONTAKTQUELLEN.map(k => {
+                  const kqArr = Array.isArray(form.kontaktquelle) ? form.kontaktquelle : []
+                  const active = kqArr.includes(k)
+                  const c = TAG_COLORS[k] || TAG_COLORS.Sonstiges
+                  return (
+                    <button key={k} type="button"
+                      onClick={() => set('kontaktquelle', active ? kqArr.filter(x => x !== k) : [...kqArr, k])}
+                      style={{
+                        padding: '4px 12px', borderRadius: 20, fontSize: 12, cursor: 'pointer',
+                        border: active ? `2px solid ${c.color}` : '1px solid var(--line)',
+                        background: active ? c.bg : 'var(--white)',
+                        color: active ? c.color : 'var(--text)',
+                        fontWeight: active ? 700 : 400,
+                      }}>
+                      {k}
+                    </button>
+                  )
+                })}
+              </div>
+              {(Array.isArray(form.kontaktquelle) ? form.kontaktquelle : []).includes('Sonstiges') && (
+                <input className="form-input" placeholder="Bitte beschreiben…"
+                  value={form.kontaktquelle_sonstiges || ''}
+                  onChange={e => set('kontaktquelle_sonstiges', e.target.value)} />
+              )}
+            </div>
+          </div>
+        </div>
       </div>
 
-      <PersonForm prefix="p1" title={p1Title} defaultOpen={true} />
+      {/* ── Kundendaten ── */}
+      <div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
+          <span style={{
+            fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.08em',
+            color: '#fff', background: '#16a34a', padding: '3px 10px', borderRadius: 20,
+          }}>Kundendaten</span>
+          <span style={{ fontSize: 11, color: 'var(--muted)' }}>Persönliche Angaben des Kunden</span>
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+          <PersonForm prefix="p1" title={p1Title} defaultOpen={true} />
       {showP2
         ? <PersonForm prefix="p2" title={p2Title} defaultOpen={true} />
         : (
@@ -562,6 +596,8 @@ function StammdatenTab({ kunde, saveAll }) {
           </button>
         )
       }
+        </div>
+      </div>
 
       <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
         <button type="submit" className="btn btn-primary">Speichern</button>
