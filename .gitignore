@@ -1,0 +1,13 @@
+node_modules/
+backend/__pycache__/
+backend/minicrm.db
+backend/*.db
+backend/*.pyc
+backend/venv/
+backend/.venv/
+dist/
+.env
+.env.local
+.env.production
+.DS_Store
+Thumbs.db
