@@ -26,6 +26,12 @@
   --status-ov-bg: #fef2f2; --status-ov-c: #dc2626; --status-ov-b: #fecaca;
   --status-td-bg: #fffbeb; --status-td-c: #d97706; --status-td-b: #fde68a;
   --status-fu-bg: #f0fdf4; --status-fu-c: #16a34a; --status-fu-b: #bbf7d0;
+  /* Kontaktquelle-Tags */
+  --tag-dummy-bg: #f3f4f6; --tag-dummy-c: #6b7280; --tag-dummy-b: #d1d5db;
+  --tag-lead-bg:  #eff6ff; --tag-lead-c:  #2563eb; --tag-lead-b:  #bfdbfe;
+  --tag-empf-bg:  #f0fdf4; --tag-empf-c:  #16a34a; --tag-empf-b:  #bbf7d0;
+  --tag-best-bg:  #fef9c3; --tag-best-c:  #a16207; --tag-best-b:  #fde68a;
+  --tag-sonst-bg: #fdf4ff; --tag-sonst-c: #9333ea; --tag-sonst-b: #e9d5ff;
 }
 
 /* Marine (Blau) */
@@ -86,6 +92,11 @@
   --status-ov-bg: #2d1515; --status-ov-c: #f87171; --status-ov-b: #7f1d1d;
   --status-td-bg: #2d1f07; --status-td-c: #fbbf24; --status-td-b: #78350f;
   --status-fu-bg: #052e16; --status-fu-c: #4ade80; --status-fu-b: #14532d;
+  --tag-dummy-bg: #374151; --tag-dummy-c: #9ca3af; --tag-dummy-b: #4b5563;
+  --tag-lead-bg:  #1e3a5f; --tag-lead-c:  #60a5fa; --tag-lead-b:  #1e40af;
+  --tag-empf-bg:  #052e16; --tag-empf-c:  #4ade80; --tag-empf-b:  #14532d;
+  --tag-best-bg:  #2d1f07; --tag-best-c:  #fbbf24; --tag-best-b:  #78350f;
+  --tag-sonst-bg: #2e1065; --tag-sonst-c: #c084fc; --tag-sonst-b: #6b21a8;
 }
 
 body {

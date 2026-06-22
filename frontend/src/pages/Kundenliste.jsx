@@ -35,11 +35,11 @@ const EMPTY = {
 }
 
 const TAG_COLORS = {
-  Dummy:        { bg: '#f3f4f6', color: '#6b7280', border: '#d1d5db' },
-  Lead:         { bg: '#eff6ff', color: '#2563eb', border: '#bfdbfe' },
-  Empfehlung:   { bg: '#f0fdf4', color: '#16a34a', border: '#bbf7d0' },
-  Bestandskunde:{ bg: '#fef9c3', color: '#a16207', border: '#fde68a' },
-  Sonstiges:    { bg: '#fdf4ff', color: '#9333ea', border: '#e9d5ff' },
+  Dummy:        { bg: 'var(--tag-dummy-bg)', color: 'var(--tag-dummy-c)', border: 'var(--tag-dummy-b)' },
+  Lead:         { bg: 'var(--tag-lead-bg)',  color: 'var(--tag-lead-c)',  border: 'var(--tag-lead-b)' },
+  Empfehlung:   { bg: 'var(--tag-empf-bg)',  color: 'var(--tag-empf-c)',  border: 'var(--tag-empf-b)' },
+  Bestandskunde:{ bg: 'var(--tag-best-bg)',  color: 'var(--tag-best-c)',  border: 'var(--tag-best-b)' },
+  Sonstiges:    { bg: 'var(--tag-sonst-bg)', color: 'var(--tag-sonst-c)', border: 'var(--tag-sonst-b)' },
 }
 
 function KontaktTag({ label, small }) {
@@ -384,9 +384,9 @@ export default function Kundenliste() {
                       <button key={key} type="button" onClick={() => toggleAnfrage(key)} style={{
                         display: 'flex', alignItems: 'center', gap: 5,
                         padding: '4px 10px', borderRadius: 20, fontSize: 12, cursor: 'pointer',
-                        border: selected ? '2px solid #2563eb' : '1px solid var(--line)',
-                        background: selected ? '#eff6ff' : 'var(--white)',
-                        color: selected ? '#2563eb' : 'var(--text)',
+                        border: selected ? '2px solid var(--accent)' : '1px solid var(--line)',
+                        background: selected ? 'var(--accent-light)' : 'var(--white)',
+                        color: selected ? 'var(--accent)' : 'var(--text)',
                         fontWeight: selected ? 700 : 400,
                       }}>
                         <span>{meta.icon}</span> {meta.short}

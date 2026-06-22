@@ -314,15 +314,15 @@ export default function AdminEinstellungen() {
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                 {report.filter(r => !r.has_kategorie).map(r => (
-                  <div key={r.customer_id} style={{ padding: '6px 10px', borderRadius: 8, border: '1px solid #fde68a', background: '#fef9c3', fontSize: 12 }}>
+                  <div key={r.customer_id} style={{ padding: '6px 10px', borderRadius: 8, border: '1px solid var(--tag-best-b)', background: 'var(--tag-best-bg)', fontSize: 12 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                       <span style={{ fontWeight: 700 }}>{r.name}</span>
                       <button type="button" onClick={() => navigate(`/kunden/${r.customer_id}?tab=uebersicht`)}
-                        style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#2563eb', fontSize: 11, padding: 0, textDecoration: 'underline' }}>
+                        style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--accent)', fontSize: 11, padding: 0, textDecoration: 'underline' }}>
                         ID {r.customer_id} →
                       </button>
                     </div>
-                    <div style={{ color: '#a16207', marginTop: 2 }}>
+                    <div style={{ color: 'var(--tag-best-c)', marginTop: 2 }}>
                       Produkt: <strong>{r.produkt}</strong>
                       {r.mapped ? <span style={{ color: 'var(--green)', marginLeft: 6 }}>✓ Mapping vorhanden</span>
                                : <span style={{ color: 'var(--red)', marginLeft: 6 }}>✗ Kein Mapping</span>}
