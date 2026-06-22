@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom'
 import { customers } from '../lib/api'
 import VertraegeTab from './VertraegeTab'
+import AddressAutocomplete from '../components/AddressAutocomplete'
 
 const KONTAKTQUELLEN = ['Dummy', 'Lead', 'Empfehlung', 'Bestandskunde', 'Sonstiges']
 
@@ -464,7 +465,15 @@ function PersonForm({ prefix, title, defaultOpen = true, form, set }) {
 
             <Section label="Adresse" cols="2fr 90px 1fr">
               <Field label="Straße & Nr.">
-                <input className="form-input" value={g('strasse') || ''} onChange={s('strasse')} />
+                <AddressAutocomplete
+                  value={g('strasse') || ''}
+                  onChange={v => set(`${prefix}_strasse`, v)}
+                  onSelect={({ strasse, plz, ort }) => {
+                    set(`${prefix}_strasse`, strasse)
+                    set(`${prefix}_plz`, plz)
+                    set(`${prefix}_ort`, ort)
+                  }}
+                />
               </Field>
               <Field label="PLZ">
                 <input className="form-input" value={g('plz') || ''} onChange={s('plz')} />
