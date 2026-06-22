@@ -23,6 +23,11 @@ export default function App() {
   const navigate = useNavigate()
   const [taskCount, setTaskCount] = useState(0)
 
+  useEffect(() => {
+    const saved = localStorage.getItem('crm-theme')
+    if (saved) document.documentElement.setAttribute('data-theme', saved)
+  }, [])
+
   const kundeMatch = location.pathname.match(/^\/kunden\/(\d+)/)
   const kundeId    = kundeMatch ? kundeMatch[1] : null
   const activeTab  = new URLSearchParams(location.search).get('tab') || 'uebersicht'

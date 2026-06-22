@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { settings, leads } from '../lib/api'
 
@@ -160,6 +160,23 @@ export default function AdminEinstellungen() {
 
   const anySaved = tv.saved || mapping.saved || template.saved || buchungslink.saved || kanal.saved
 
+  // ── Theme ──
+  const THEMES = [
+    { id: 'hell',    label: 'Hell',   accent: '#c0392b', bg: '#f4f5f7', card: '#ffffff' },
+    { id: 'marine',  label: 'Marine', accent: '#2563eb', bg: '#f0f4ff', card: '#ffffff' },
+    { id: 'wald',    label: 'Wald',   accent: '#16a34a', bg: '#f0fdf4', card: '#ffffff' },
+    { id: 'dunkel',  label: 'Dunkel', accent: '#e05050', bg: '#0f172a', card: '#1e293b' },
+  ]
+  const [activeTheme, setActiveTheme] = useState(
+    () => localStorage.getItem('crm-theme') || 'hell'
+  )
+  function applyTheme(id) {
+    setActiveTheme(id)
+    localStorage.setItem('crm-theme', id)
+    if (id === 'hell') document.documentElement.removeAttribute('data-theme')
+    else document.documentElement.setAttribute('data-theme', id)
+  }
+
   return (
     <>
       <div className="page-header">
@@ -168,6 +185,36 @@ export default function AdminEinstellungen() {
           <div className="page-sub">Systemkonfiguration</div>
         </div>
         {anySaved && <span style={{ marginLeft: 'auto', fontSize: 13, color: 'var(--green)', fontWeight: 600 }}>Gespeichert ✓</span>}
+      </div>
+
+      {/* ── Farbschema ── */}
+      <div className="card" style={{ maxWidth: 520, marginBottom: 16 }}>
+        <div className="section-label" style={{ marginBottom: 4 }}>Farbschema</div>
+        <div style={{ fontSize: 12, color: 'var(--muted)', marginBottom: 16 }}>
+          Wird lokal gespeichert und gilt nur für dieses Gerät.
+        </div>
+        <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+          {THEMES.map(t => (
+            <button key={t.id} type="button" onClick={() => applyTheme(t.id)} style={{
+              display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8,
+              padding: '12px 16px', borderRadius: 10, cursor: 'pointer',
+              border: activeTheme === t.id ? '2px solid var(--accent)' : '2px solid var(--line)',
+              background: activeTheme === t.id ? 'var(--accent-light)' : 'var(--white)',
+              minWidth: 90,
+            }}>
+              {/* Mini-Preview */}
+              <div style={{ width: 56, height: 40, borderRadius: 6, background: t.bg, border: '1px solid #ccc', overflow: 'hidden', position: 'relative' }}>
+                <div style={{ position: 'absolute', left: 0, top: 0, width: 16, height: '100%', background: t.card, borderRight: '1px solid #ddd' }} />
+                <div style={{ position: 'absolute', left: 20, top: 8, right: 4, height: 8, borderRadius: 3, background: t.accent }} />
+                <div style={{ position: 'absolute', left: 20, top: 20, right: 4, height: 5, borderRadius: 3, background: t.card }} />
+                <div style={{ position: 'absolute', left: 20, top: 28, width: '40%', height: 5, borderRadius: 3, background: t.card }} />
+              </div>
+              <span style={{ fontSize: 12, fontWeight: activeTheme === t.id ? 700 : 500, color: activeTheme === t.id ? 'var(--accent)' : 'var(--text)' }}>
+                {t.label}
+              </span>
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* ── Terminverlauf Status ── */}

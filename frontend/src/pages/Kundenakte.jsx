@@ -391,7 +391,7 @@ function StammdatenTab({ kunde, saveAll }) {
   function Section({ label, children, cols = '1fr 1fr 1fr' }) {
     return (
       <div style={{
-        background: '#e8eaed', borderRadius: 8, padding: '14px 16px 16px',
+        background: 'var(--section-bg)', borderRadius: 8, padding: '14px 16px 16px',
       }}>
         <div style={{
           fontSize: 10, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.12em',
