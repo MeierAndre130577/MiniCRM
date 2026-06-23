@@ -340,8 +340,18 @@ function Section({ label, children, cols = '1fr 1fr 1fr' }) {
   )
 }
 
+const PERSON_TABS = ['Person', 'Kontakt', 'Adresse', 'Beruf']
+
+function filledCount(fields, form, prefix) {
+  return fields.filter(k => {
+    const v = form[`${prefix}_${k}`]
+    return v !== null && v !== undefined && v !== '' && v !== 0
+  }).length
+}
+
 function PersonForm({ prefix, title, defaultOpen = true, form, set }) {
-  const [open, setOpen] = useState(defaultOpen)
+  const [open, setOpen]     = useState(defaultOpen)
+  const [activeTab, setTab] = useState('Person')
   const g = (k) => form[`${prefix}_${k}`]
   const s = (k) => (e) => set(`${prefix}_${k}`, e.target.value)
   const sNum = (k) => (e) => set(`${prefix}_${k}`, e.target.value ? Number(e.target.value) : null)
@@ -350,21 +360,59 @@ function PersonForm({ prefix, title, defaultOpen = true, form, set }) {
     const filled = v !== null && v !== undefined && v !== ''
     return { background: filled ? 'var(--status-fu-bg)' : 'var(--status-ov-bg)' }
   }
-    return (
-      <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
-        <div onClick={() => setOpen(o => !o)} style={{
-          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-          padding: '13px 20px', cursor: 'pointer', userSelect: 'none',
-          borderBottom: open ? '1px solid var(--line)' : 'none',
-        }}>
-          <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--text)' }}>{title}</span>
-          <span style={{ fontSize: 11, color: 'var(--muted)', transform: open ? 'rotate(180deg)' : 'none', transition: 'transform .2s' }}>▼</span>
-        </div>
 
-        {open && (
-          <div style={{ padding: 16, display: 'flex', flexDirection: 'column', gap: 10 }}>
+  const TAB_FIELDS = {
+    Person:  ['anrede','vorname','nachname','geburtsdatum','familienstand','raucher','hobby','haustiere'],
+    Kontakt: ['email','handy','festnetz'],
+    Adresse: ['strasse','plz','ort'],
+    Beruf:   ['beruf','abschluss','arbeitsverhaeltnis','arbeitgeber','gehalt_netto','gehalt_brutto','gkv_anbieter','gkv_stand','iban'],
+  }
 
-            <Section label="Identität" cols="120px 1fr 1fr">
+  return (
+    <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
+      {/* ── Kopfzeile ── */}
+      <div onClick={() => setOpen(o => !o)} style={{
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        padding: '13px 20px', cursor: 'pointer', userSelect: 'none',
+        borderBottom: open ? '1px solid var(--line)' : 'none',
+      }}>
+        <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--text)' }}>{title}</span>
+        <span style={{ fontSize: 11, color: 'var(--muted)', transform: open ? 'rotate(180deg)' : 'none', transition: 'transform .2s' }}>▼</span>
+      </div>
+
+      {open && (
+        <div style={{ padding: '12px 16px 16px' }}>
+          {/* ── Tab-Leiste ── */}
+          <div style={{ display: 'flex', gap: 4, marginBottom: 14, borderBottom: '1px solid var(--line)', paddingBottom: 10 }}>
+            {PERSON_TABS.map(t => {
+              const count = filledCount(TAB_FIELDS[t], form, prefix)
+              const active = activeTab === t
+              return (
+                <button key={t} type="button" onClick={() => setTab(t)}
+                  style={{
+                    padding: '5px 14px', borderRadius: 20, fontSize: 12, fontWeight: active ? 700 : 400,
+                    border: active ? '1.5px solid var(--accent)' : '1px solid var(--line)',
+                    background: active ? 'var(--accent)' : 'transparent',
+                    color: active ? '#fff' : 'var(--text)',
+                    cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 5,
+                  }}>
+                  {t}
+                  {count > 0 && (
+                    <span style={{
+                      fontSize: 10, fontWeight: 700, lineHeight: 1,
+                      background: active ? 'rgba(255,255,255,0.3)' : 'var(--status-fu-bg)',
+                      color: active ? '#fff' : 'var(--status-fu-c)',
+                      padding: '1px 5px', borderRadius: 10,
+                    }}>{count}</span>
+                  )}
+                </button>
+              )
+            })}
+          </div>
+
+          {/* ── Tab: Person ── */}
+          {activeTab === 'Person' && (
+            <div style={{ display: 'grid', gridTemplateColumns: '120px 1fr 1fr', gap: '10px 16px' }}>
               <Field label="Anrede">
                 <select className="form-select" style={fb('anrede')} value={g('anrede') || ''} onChange={s('anrede')}>
                   <option value="">—</option>
@@ -392,9 +440,18 @@ function PersonForm({ prefix, title, defaultOpen = true, form, set }) {
                   <option value={0}>Nein</option><option value={1}>Ja</option>
                 </select>
               </Field>
-            </Section>
+              <Field label="Hobby">
+                <input className="form-input" style={fb('hobby')} value={g('hobby') || ''} onChange={s('hobby')} />
+              </Field>
+              <Field label="Haustiere">
+                <input className="form-input" style={fb('haustiere')} value={g('haustiere') || ''} onChange={s('haustiere')} />
+              </Field>
+            </div>
+          )}
 
-            <Section label="Kontakt" cols="1fr 1fr 1fr">
+          {/* ── Tab: Kontakt ── */}
+          {activeTab === 'Kontakt' && (
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px 16px' }}>
               <Field label="E-Mail">
                 <input type="email" className="form-input" style={fb('email')} value={g('email') || ''} onChange={s('email')} />
               </Field>
@@ -404,9 +461,12 @@ function PersonForm({ prefix, title, defaultOpen = true, form, set }) {
               <Field label="Festnetz">
                 <input className="form-input" style={fb('festnetz')} value={g('festnetz') || ''} onChange={s('festnetz')} />
               </Field>
-            </Section>
+            </div>
+          )}
 
-            <Section label="Adresse" cols="2fr 90px 1fr">
+          {/* ── Tab: Adresse ── */}
+          {activeTab === 'Adresse' && (
+            <div style={{ display: 'grid', gridTemplateColumns: '2fr 90px 1fr', gap: '10px 16px' }}>
               <Field label="Straße & Nr.">
                 <input className="form-input" style={fb('strasse')} value={g('strasse') || ''} onChange={s('strasse')} />
               </Field>
@@ -425,9 +485,12 @@ function PersonForm({ prefix, title, defaultOpen = true, form, set }) {
                   }}
                 />
               </div>
-            </Section>
+            </div>
+          )}
 
-            <Section label="Beruf & Einkommen" cols="1fr 1fr 1fr">
+          {/* ── Tab: Beruf ── */}
+          {activeTab === 'Beruf' && (
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px 16px' }}>
               <Field label="Beruf">
                 <input className="form-input" style={fb('beruf')} value={g('beruf') || ''} onChange={s('beruf')} />
               </Field>
@@ -464,22 +527,14 @@ function PersonForm({ prefix, title, defaultOpen = true, form, set }) {
               <Field label="IBAN">
                 <input className="form-input" style={fb('iban')} value={g('iban') || ''} onChange={s('iban')} />
               </Field>
-            </Section>
-
-            <Section label="Persönliches" cols="1fr 1fr">
-              <Field label="Hobby">
-                <input className="form-input" style={fb('hobby')} value={g('hobby') || ''} onChange={s('hobby')} />
-              </Field>
-              <Field label="Haustiere">
-                <input className="form-input" style={fb('haustiere')} value={g('haustiere') || ''} onChange={s('haustiere')} />
-              </Field>
-            </Section>
-
-          </div>
-        )}
-      </div>
-    )
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  )
 }
+
 
 function StammdatenTab({ kunde, saveAll }) {
   const [form, setForm] = useState(toForm(kunde))
