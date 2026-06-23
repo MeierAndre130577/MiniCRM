@@ -58,6 +58,7 @@ export default function AnalyseTab({ cats: catsProp, contracts, recommendations,
   const [form, setForm]            = useState(EMPTY_FORM)
   const [saving, setSaving]        = useState(false)
   const [expanded, setExpanded]    = useState({})
+  const [saved, setSaved]          = useState({}) // { [cat]: true } kurzes ✓-Signal
 
   // sync wenn von außen neue Daten kommen (z.B. nach load())
   useEffect(() => { setLocalCats(catsProp) }, [catsProp])
@@ -74,23 +75,18 @@ export default function AnalyseTab({ cats: catsProp, contracts, recommendations,
     return hasCat || hasContracts || hasRecs
   }
 
+  function flashSaved(cat) {
+    setSaved(p => ({ ...p, [cat]: true }))
+    setTimeout(() => setSaved(p => ({ ...p, [cat]: false })), 1500)
+  }
+
   function updateGespraechStatus(cat, status) {
-    // optimistisch sofort updaten
-    setLocalCats(p => ({
-      ...p,
-      [cat]: { ...(p[cat] || {}), status },
-    }))
-    // API fire-and-forget
+    setLocalCats(p => ({ ...p, [cat]: { ...(p[cat] || {}), status } }))
     customers.updateCategory(customerId, cat, {
       status,
       notizen: (localCats[cat] || {}).notizen || '',
-    }).catch(() => {
-      // bei Fehler zurückrollen
-      setLocalCats(p => ({
-        ...p,
-        [cat]: { ...(p[cat] || {}), status: (catsProp[cat] || {}).status || 'nicht_besprochen' },
-      }))
-    })
+    }).then(() => flashSaved(cat))
+      .catch(() => alert('Speichern fehlgeschlagen – bitte nochmal klicken.'))
   }
 
   function updateNotizen(cat, notizen) {
@@ -200,6 +196,9 @@ export default function AnalyseTab({ cats: catsProp, contracts, recommendations,
               }} onClick={() => toggleExpand(key)}>
                 <span style={{ fontSize: 18 }}>{m.icon}</span>
                 <span style={{ fontWeight: 700, fontSize: 14 }}>{m.label}</span>
+                {saved[key] && (
+                  <span style={{ fontSize: 11, color: 'var(--status-fu-c)', fontWeight: 700 }}>✓</span>
+                )}
 
                 {/* Bestand-Badge direkt nach Kategorie */}
                 {bestand.length > 0 && (
