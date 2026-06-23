@@ -114,7 +114,7 @@ export default function Kundenakte() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const tab = searchParams.get('tab') || 'uebersicht'
-  const FORM_TABS = ['stammdaten', 'ansprechpartner', 'budget', 'notizen']
+  const FORM_TABS = ['stammdaten', 'ansprechpartner']
   const activeFormId = FORM_TABS.includes(tab) ? `form-${tab}` : null
   const [kunde, setKunde]           = useState(null)
   const [saving, setSaving]         = useState(false)
@@ -284,11 +284,6 @@ export default function Kundenakte() {
         <ApScoresTab apScores={apScores} saveAll={saveAll} kunde={kunde} />
       )}
 
-      {/* ── Budget ── */}
-      {tab === 'budget' && (
-        <BudgetTab kunde={kunde} saveAll={saveAll} />
-      )}
-
       {/* ── Termine ── */}
       {tab === 'termine' && (
         <TermineTab
@@ -299,11 +294,6 @@ export default function Kundenakte() {
           apptForm={apptForm} setApptForm={setApptForm}
           addAppt={addAppt} delAppt={delAppt}
         />
-      )}
-
-      {/* ── Notizen ── */}
-      {tab === 'notizen' && (
-        <NotizTab kunde={kunde} saveAll={saveAll} />
       )}
 
       {/* ── Verträge ── */}
@@ -344,6 +334,30 @@ export default function Kundenakte() {
         </div>
       )}
     </>
+  )
+}
+
+// ── Stammdaten Sektion ────────────────────────────────────────────────────────
+function StammdatenSektion({ label, color = 'var(--primary)', children }) {
+  const [open, setOpen] = useState(true)
+  return (
+    <div>
+      <button type="button" onClick={() => setOpen(o => !o)} style={{
+        display: 'flex', alignItems: 'center', gap: 10, marginBottom: open ? 8 : 0,
+        background: 'none', border: 'none', cursor: 'pointer', padding: 0, width: '100%',
+      }}>
+        <span style={{
+          fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.08em',
+          color: '#fff', background: color, padding: '3px 10px', borderRadius: 20,
+        }}>{label}</span>
+        <span style={{ fontSize: 13, color: 'var(--muted)', marginLeft: 'auto' }}>{open ? '▲' : '▼'}</span>
+      </button>
+      {open && (
+        <div className="card" style={{ padding: '14px 16px', borderLeft: `3px solid ${color}` }}>
+          {children}
+        </div>
+      )}
+    </div>
   )
 }
 
@@ -685,21 +699,134 @@ function StammdatenTab({ kunde, saveAll }) {
         </div>
         <div className="card" style={{ padding: '14px 16px', borderLeft: '3px solid #16a34a', display: 'flex', flexDirection: 'column', gap: 10 }}>
           <PersonForm prefix="p1" title={p1Title} defaultOpen={true} form={form} set={set} />
-      {showP2
-        ? <PersonForm prefix="p2" title={p2Title} defaultOpen={true} form={form} set={set} />
-        : (
-          <button type="button" onClick={() => setShowP2(true)} style={{
-            display: 'flex', alignItems: 'center', gap: 8,
-            padding: '10px 16px', borderRadius: 8, fontSize: 13, fontWeight: 600,
-            border: '2px dashed var(--line)', background: 'transparent',
-            color: 'var(--muted)', cursor: 'pointer', width: '100%',
-          }}>
-            <span style={{ fontSize: 16 }}>+</span> Person hinzufügen
-          </button>
-        )
-      }
+          {showP2
+            ? <PersonForm prefix="p2" title={p2Title} defaultOpen={true} form={form} set={set} />
+            : (
+              <button type="button" onClick={() => setShowP2(true)} style={{
+                display: 'flex', alignItems: 'center', gap: 8,
+                padding: '10px 16px', borderRadius: 8, fontSize: 13, fontWeight: 600,
+                border: '2px dashed var(--line)', background: 'transparent',
+                color: 'var(--muted)', cursor: 'pointer', width: '100%',
+              }}>
+                <span style={{ fontSize: 16 }}>+</span> Person hinzufügen
+              </button>
+            )
+          }
         </div>
       </div>
+
+      {/* ── Budget für Neuverträge ── */}
+      <StammdatenSektion label="Budget für Neuverträge" color="#7c3aed">
+        <div className="grid-2">
+          <Field label="Absicherung monatlich (€)">
+            <input type="number" className="form-input" value={form.budget_absicherung_monatlich || ''}
+              onChange={e => set('budget_absicherung_monatlich', e.target.value ? Number(e.target.value) : null)} />
+          </Field>
+          <Field label="Absicherung einmalig (€)">
+            <input type="number" className="form-input" value={form.budget_absicherung_einmalig || ''}
+              onChange={e => set('budget_absicherung_einmalig', e.target.value ? Number(e.target.value) : null)} />
+          </Field>
+          <Field label="Ansparung monatlich (€)">
+            <input type="number" className="form-input" value={form.budget_ansparung_monatlich || ''}
+              onChange={e => set('budget_ansparung_monatlich', e.target.value ? Number(e.target.value) : null)} />
+          </Field>
+          <Field label="Ansparung einmalig (€)">
+            <input type="number" className="form-input" value={form.budget_ansparung_einmalig || ''}
+              onChange={e => set('budget_ansparung_einmalig', e.target.value ? Number(e.target.value) : null)} />
+          </Field>
+          <div style={{ gridColumn: '1 / -1' }}>
+            <Field label="Notizen">
+              <textarea className="form-textarea" value={form.budget_notizen || ''}
+                onChange={e => set('budget_notizen', e.target.value)} />
+            </Field>
+          </div>
+        </div>
+      </StammdatenSektion>
+
+      {/* ── Haushaltsrechner ── */}
+      <StammdatenSektion label="Haushaltsrechner" color="#7c3aed">
+        {(() => {
+          const einnahmen = (Number(form.hhr_einnahmen_gehalt) || 0)
+            + (Number(form.hhr_einnahmen_zuschuesse) || 0)
+            + (Number(form.hhr_einnahmen_weitere) || 0)
+          const frei = form.hhr_freier_betrag
+            || (einnahmen && form.hhr_ausgaben_gesamt ? einnahmen - Number(form.hhr_ausgaben_gesamt) : null)
+          return (
+            <div className="grid-3">
+              <Field label="Gehalt gesamt (€)">
+                <input type="number" className="form-input" value={form.hhr_einnahmen_gehalt || ''}
+                  onChange={e => set('hhr_einnahmen_gehalt', e.target.value ? Number(e.target.value) : null)} />
+              </Field>
+              <Field label="Staatliche Zuschüsse (€)">
+                <input type="number" className="form-input" value={form.hhr_einnahmen_zuschuesse || ''}
+                  onChange={e => set('hhr_einnahmen_zuschuesse', e.target.value ? Number(e.target.value) : null)} />
+              </Field>
+              <Field label="Weitere Einnahmen (€)">
+                <input type="number" className="form-input" value={form.hhr_einnahmen_weitere || ''}
+                  onChange={e => set('hhr_einnahmen_weitere', e.target.value ? Number(e.target.value) : null)} />
+              </Field>
+              <Field label="Ausgaben gesamt (€)">
+                <input type="number" className="form-input" value={form.hhr_ausgaben_gesamt || ''}
+                  onChange={e => set('hhr_ausgaben_gesamt', e.target.value ? Number(e.target.value) : null)} />
+              </Field>
+              <Field label="Freier Betrag mtl. (€)">
+                <input type="number" className="form-input"
+                  value={form.hhr_freier_betrag || (frei ?? '')}
+                  onChange={e => set('hhr_freier_betrag', e.target.value ? Number(e.target.value) : null)} />
+              </Field>
+              <div style={{ gridColumn: '1 / -1' }}>
+                <Field label="Notizen">
+                  <textarea className="form-textarea" value={form.hhr_notizen || ''}
+                    onChange={e => set('hhr_notizen', e.target.value)} />
+                </Field>
+              </div>
+            </div>
+          )
+        })()}
+      </StammdatenSektion>
+
+      {/* ── Empfehlung & Bewertung ── */}
+      <StammdatenSektion label="Empfehlung & Bewertung" color="#b45309">
+        <div className="grid-3">
+          <Field label="Google (Sterne 1–5)">
+            <select className="form-select" value={form.bewertung_google || ''}
+              onChange={e => set('bewertung_google', e.target.value ? Number(e.target.value) : null)}>
+              <option value="">—</option>
+              {[1,2,3,4,5].map(n => <option key={n} value={n}>{'★'.repeat(n)} ({n})</option>)}
+            </select>
+          </Field>
+          <Field label="Trustpilot (1–5)">
+            <select className="form-select" value={form.bewertung_trustpilot || ''}
+              onChange={e => set('bewertung_trustpilot', e.target.value ? Number(e.target.value) : null)}>
+              <option value="">—</option>
+              {[1,2,3,4,5].map(n => <option key={n} value={n}>{'★'.repeat(n)} ({n})</option>)}
+            </select>
+          </Field>
+          <Field label="Facebook (1–5)">
+            <select className="form-select" value={form.bewertung_facebook || ''}
+              onChange={e => set('bewertung_facebook', e.target.value ? Number(e.target.value) : null)}>
+              <option value="">—</option>
+              {[1,2,3,4,5].map(n => <option key={n} value={n}>{'★'.repeat(n)} ({n})</option>)}
+            </select>
+          </Field>
+          <div style={{ gridColumn: '1 / -1' }}>
+            <Field label="Empfehlungsnotizen">
+              <textarea className="form-textarea" value={form.empfehlung_notizen || ''}
+                onChange={e => set('empfehlung_notizen', e.target.value)}
+                placeholder="Empfehlungen, positive Erfahrungen…" />
+            </Field>
+          </div>
+        </div>
+      </StammdatenSektion>
+
+      {/* ── Schäden ── */}
+      <StammdatenSektion label="Schäden" color="#b45309">
+        <Field label="Notizen">
+          <textarea className="form-textarea" rows={5} value={form.schaeden_notizen || ''}
+            onChange={e => set('schaeden_notizen', e.target.value)}
+            placeholder="Bekannte Schäden, Vorerkrankungen…" />
+        </Field>
+      </StammdatenSektion>
 
     </form>
   )
@@ -768,87 +895,6 @@ function ApScoresTab({ apScores, saveAll, kunde }) {
               <option>500 €</option>
               <option>1.000 €</option>
             </select>
-          </Field>
-        </div>
-      </div>
-
-    </form>
-  )
-}
-
-// ── Budget Tab ────────────────────────────────────────────────────────────────
-function BudgetTab({ kunde, saveAll }) {
-  const [form, setForm] = useState(toForm(kunde))
-  const set = (k, v) => setForm(f => ({ ...f, [k]: v }))
-
-  async function handleSave(e) {
-    e.preventDefault()
-    await saveAll(form)
-  }
-
-  const einnahmen = (Number(form.hhr_einnahmen_gehalt) || 0) +
-    (Number(form.hhr_einnahmen_zuschuesse) || 0) +
-    (Number(form.hhr_einnahmen_weitere) || 0)
-
-  return (
-    <form id="form-budget" onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-      <div className="card">
-        <div className="section-label" style={{ marginBottom: 12 }}>Budget für Neuverträge</div>
-        <div className="grid-2">
-          <Field label="Absicherung monatlich (€)">
-            <input type="number" className="form-input" value={form.budget_absicherung_monatlich || ''}
-              onChange={e => set('budget_absicherung_monatlich', e.target.value ? Number(e.target.value) : null)} />
-          </Field>
-          <Field label="Absicherung einmalig (€)">
-            <input type="number" className="form-input" value={form.budget_absicherung_einmalig || ''}
-              onChange={e => set('budget_absicherung_einmalig', e.target.value ? Number(e.target.value) : null)} />
-          </Field>
-          <Field label="Ansparung monatlich (€)">
-            <input type="number" className="form-input" value={form.budget_ansparung_monatlich || ''}
-              onChange={e => set('budget_ansparung_monatlich', e.target.value ? Number(e.target.value) : null)} />
-          </Field>
-          <Field label="Ansparung einmalig (€)">
-            <input type="number" className="form-input" value={form.budget_ansparung_einmalig || ''}
-              onChange={e => set('budget_ansparung_einmalig', e.target.value ? Number(e.target.value) : null)} />
-          </Field>
-        </div>
-        <div style={{ marginTop: 12 }}>
-          <Field label="Notizen">
-            <textarea className="form-textarea" value={form.budget_notizen || ''}
-              onChange={e => set('budget_notizen', e.target.value)} />
-          </Field>
-        </div>
-      </div>
-
-      <div className="card">
-        <div className="section-label" style={{ marginBottom: 12 }}>Haushaltsrechner</div>
-        <div className="grid-3">
-          <Field label="Gehalt gesamt (€)">
-            <input type="number" className="form-input" value={form.hhr_einnahmen_gehalt || ''}
-              onChange={e => set('hhr_einnahmen_gehalt', e.target.value ? Number(e.target.value) : null)} />
-          </Field>
-          <Field label="Staatliche Zuschüsse (€)">
-            <input type="number" className="form-input" value={form.hhr_einnahmen_zuschuesse || ''}
-              onChange={e => set('hhr_einnahmen_zuschuesse', e.target.value ? Number(e.target.value) : null)} />
-          </Field>
-          <Field label="Weitere Einnahmen (€)">
-            <input type="number" className="form-input" value={form.hhr_einnahmen_weitere || ''}
-              onChange={e => set('hhr_einnahmen_weitere', e.target.value ? Number(e.target.value) : null)} />
-          </Field>
-          <Field label="Ausgaben gesamt (€)">
-            <input type="number" className="form-input" value={form.hhr_ausgaben_gesamt || ''}
-              onChange={e => set('hhr_ausgaben_gesamt', e.target.value ? Number(e.target.value) : null)} />
-          </Field>
-          <Field label="Freier Betrag mtl. (€)">
-            <input type="number" className="form-input"
-              value={form.hhr_freier_betrag || (einnahmen && form.hhr_ausgaben_gesamt ? einnahmen - Number(form.hhr_ausgaben_gesamt) : '')}
-              onChange={e => set('hhr_freier_betrag', e.target.value ? Number(e.target.value) : null)} />
-          </Field>
-        </div>
-        <div style={{ marginTop: 12 }}>
-          <Field label="Notizen">
-            <textarea className="form-textarea" value={form.hhr_notizen || ''}
-              onChange={e => set('hhr_notizen', e.target.value)} />
           </Field>
         </div>
       </div>
@@ -1074,67 +1120,6 @@ function TermineTab({ kunde, saveAll, tvStatus, showAppt, setShowAppt, apptForm,
         </div>
       )}
     </div>
-  )
-}
-
-// ── Notizen Tab ────────────────────────────────────────────────────────────────
-function NotizTab({ kunde, saveAll }) {
-  const [form, setForm] = useState(toForm(kunde))
-  const set = (k, v) => setForm(f => ({ ...f, [k]: v }))
-
-  async function handleSave(e) {
-    e.preventDefault()
-    await saveAll(form)
-  }
-
-  return (
-    <form id="form-notizen" onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-      {/* Empfehlung & Bewertung */}
-      <div className="card">
-        <div className="section-label" style={{ marginBottom: 12 }}>Empfehlung & Bewertung</div>
-        <div className="grid-3">
-          <Field label="Google (Sterne 1–5)">
-            <select className="form-select" value={form.bewertung_google || ''}
-              onChange={e => set('bewertung_google', e.target.value ? Number(e.target.value) : null)}>
-              <option value="">—</option>
-              {[1,2,3,4,5].map(n => <option key={n} value={n}>{'★'.repeat(n)} ({n})</option>)}
-            </select>
-          </Field>
-          <Field label="Trustpilot (1–5)">
-            <select className="form-select" value={form.bewertung_trustpilot || ''}
-              onChange={e => set('bewertung_trustpilot', e.target.value ? Number(e.target.value) : null)}>
-              <option value="">—</option>
-              {[1,2,3,4,5].map(n => <option key={n} value={n}>{'★'.repeat(n)} ({n})</option>)}
-            </select>
-          </Field>
-          <Field label="Facebook (1–5)">
-            <select className="form-select" value={form.bewertung_facebook || ''}
-              onChange={e => set('bewertung_facebook', e.target.value ? Number(e.target.value) : null)}>
-              <option value="">—</option>
-              {[1,2,3,4,5].map(n => <option key={n} value={n}>{'★'.repeat(n)} ({n})</option>)}
-            </select>
-          </Field>
-        </div>
-        <div style={{ marginTop: 12 }}>
-          <Field label="Empfehlungsnotizen">
-            <textarea className="form-textarea" value={form.empfehlung_notizen || ''}
-              onChange={e => set('empfehlung_notizen', e.target.value)}
-              placeholder="Empfehlungen, positive Erfahrungen…" />
-          </Field>
-        </div>
-      </div>
-
-      {/* Schäden */}
-      <div className="card">
-        <div className="section-label" style={{ marginBottom: 12 }}>Schäden</div>
-        <Field label="Notizen">
-          <textarea className="form-textarea" rows={5} value={form.schaeden_notizen || ''}
-            onChange={e => set('schaeden_notizen', e.target.value)}
-            placeholder="Bekannte Schäden, Vorerkrankungen…" />
-        </Field>
-      </div>
-
-    </form>
   )
 }
 
