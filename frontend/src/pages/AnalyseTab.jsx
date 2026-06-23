@@ -52,16 +52,13 @@ function hasDaten(c) {
   return !!(c?.gesellschaft || c?.police_nr || c?.beitrag_alt || c?.beitrag_neu)
 }
 
-export default function AnalyseTab({ cats: catsProp, contracts, recommendations, setRecommendations, customerId }) {
+export default function AnalyseTab({ cats: catsProp, setCats, contracts, recommendations, setRecommendations, customerId }) {
   const [localCats, setLocalCats]  = useState(catsProp)
   const [editState, setEditState]  = useState(null)
   const [form, setForm]            = useState(EMPTY_FORM)
   const [saving, setSaving]        = useState(false)
   const [expanded, setExpanded]    = useState({})
-  const [saved, setSaved]          = useState({}) // { [cat]: true } kurzes ✓-Signal
-
-  // sync wenn von außen neue Daten kommen (z.B. nach load())
-  useEffect(() => { setLocalCats(catsProp) }, [catsProp])
+  const [saved, setSaved]          = useState({})
 
   function toggleExpand(key) {
     setExpanded(p => ({ ...p, [key]: !p[key] }))
@@ -80,8 +77,13 @@ export default function AnalyseTab({ cats: catsProp, contracts, recommendations,
     setTimeout(() => setSaved(p => ({ ...p, [cat]: false })), 1500)
   }
 
+  function patchCat(cat, patch) {
+    setLocalCats(p => { const next = { ...p, [cat]: { ...(p[cat] || {}), ...patch } }; return next })
+    setCats(p   => ({ ...p, [cat]: { ...(p[cat] || {}), ...patch } }))
+  }
+
   function updateGespraechStatus(cat, status) {
-    setLocalCats(p => ({ ...p, [cat]: { ...(p[cat] || {}), status } }))
+    patchCat(cat, { status })
     customers.updateCategory(customerId, cat, {
       status,
       notizen: (localCats[cat] || {}).notizen || '',
@@ -90,7 +92,7 @@ export default function AnalyseTab({ cats: catsProp, contracts, recommendations,
   }
 
   function updateNotizen(cat, notizen) {
-    setLocalCats(p => ({ ...p, [cat]: { ...(p[cat] || {}), notizen } }))
+    patchCat(cat, { notizen })
     customers.updateCategory(customerId, cat, {
       status: (localCats[cat] || {}).status || 'nicht_besprochen',
       notizen,

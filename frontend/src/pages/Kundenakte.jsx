@@ -92,6 +92,7 @@ export default function Kundenakte() {
   const [katModal, setKatModal]     = useState(null)
   const [apptForm, setApptForm]     = useState({ datum: '', status: '', notizen: '' })
   const [showAppt, setShowAppt]     = useState(false)
+  const [cats, setCats]                       = useState({})
   const [contracts, setContracts]             = useState({})
   const [recommendations, setRecommendations] = useState({})
   const [tvStatus, setTvStatus]               = useState([])
@@ -102,6 +103,7 @@ export default function Kundenakte() {
   }, [id, navigate])
 
   useEffect(() => { load() }, [load])
+  useEffect(() => { if (kunde) setCats(kunde.categories || {}) }, [kunde])
 
   useEffect(() => {
     customers.getContracts(Number(id))
@@ -180,7 +182,7 @@ export default function Kundenakte() {
 
   if (!kunde) return <div style={{ padding: 40, color: 'var(--muted)' }}>Lade…</div>
 
-  const cats            = kunde.categories || {}
+  // cats wird als eigener State geführt (setCats), damit Tab-Wechsel den Stand erhält
 
   // Lead-Produkt live aus notizen ableiten falls anfrage_kategorien leer
   const storedKats = kunde.anfrage_kategorien || []
@@ -240,6 +242,7 @@ export default function Kundenakte() {
       {tab === 'analyse' && (
         <AnalyseTab
           cats={cats}
+          setCats={setCats}
           contracts={contracts}
           recommendations={recommendations}
           setRecommendations={setRecommendations}
