@@ -345,7 +345,7 @@ const PERSON_TABS = ['Person', 'Kontakt', 'Adresse', 'Beruf']
 function filledCount(fields, form, prefix) {
   return fields.filter(k => {
     const v = form[`${prefix}_${k}`]
-    return v !== null && v !== undefined && v !== '' && v !== 0
+    return v !== null && v !== undefined && v !== ''
   }).length
 }
 
@@ -385,7 +385,9 @@ function PersonForm({ prefix, title, defaultOpen = true, form, set }) {
           {/* ── Tab-Leiste ── */}
           <div style={{ display: 'flex', gap: 4, marginBottom: 14, borderBottom: '1px solid var(--line)', paddingBottom: 10 }}>
             {PERSON_TABS.map(t => {
-              const count = filledCount(TAB_FIELDS[t], form, prefix)
+              const total  = TAB_FIELDS[t].length
+              const count  = filledCount(TAB_FIELDS[t], form, prefix)
+              const full   = count === total
               const active = activeTab === t
               return (
                 <button key={t} type="button" onClick={() => setTab(t)}
@@ -397,14 +399,16 @@ function PersonForm({ prefix, title, defaultOpen = true, form, set }) {
                     cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 5,
                   }}>
                   {t}
-                  {count > 0 && (
+                  {full ? (
+                    <span style={{ fontSize: 12, color: active ? '#fff' : 'var(--status-fu-c)', fontWeight: 700 }}>✓</span>
+                  ) : count > 0 ? (
                     <span style={{
                       fontSize: 10, fontWeight: 700, lineHeight: 1,
-                      background: active ? 'rgba(255,255,255,0.3)' : 'var(--status-fu-bg)',
-                      color: active ? '#fff' : 'var(--status-fu-c)',
+                      background: active ? 'rgba(255,255,255,0.3)' : 'var(--section-bg)',
+                      color: active ? '#fff' : 'var(--muted)',
                       padding: '1px 5px', borderRadius: 10,
-                    }}>{count}</span>
-                  )}
+                    }}>{count}/{total}</span>
+                  ) : null}
                 </button>
               )
             })}
@@ -435,7 +439,7 @@ function PersonForm({ prefix, title, defaultOpen = true, form, set }) {
                 </select>
               </Field>
               <Field label="Raucher">
-                <select className="form-select" value={g('raucher') ?? 0}
+                <select className="form-select" style={fb('raucher')} value={g('raucher') ?? 0}
                   onChange={e => set(`${prefix}_raucher`, Number(e.target.value))}>
                   <option value={0}>Nein</option><option value={1}>Ja</option>
                 </select>
