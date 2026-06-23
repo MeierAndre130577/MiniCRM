@@ -22,11 +22,10 @@ const KATEGORIE_META = {
 const EMPTY_FORM = {
   gesellschaft: '', police_nr: '', ablaufdatum: '',
   beitrag_alt: '', absicherung_alt: '',
-  beitrag_neu: '', absicherung_neu: '',
 }
 
 function hasDaten(c) {
-  return !!(c?.gesellschaft || c?.police_nr || c?.beitrag_alt || c?.beitrag_neu)
+  return !!(c?.gesellschaft || c?.police_nr || c?.beitrag_alt)
 }
 
 function fmtEuro(val) {
@@ -53,8 +52,6 @@ export default function VertraegeTab({ contracts, setContracts, customerId }) {
       ablaufdatum:     c.ablaufdatum     || '',
       beitrag_alt:     c.beitrag_alt     ?? '',
       absicherung_alt: c.absicherung_alt || '',
-      beitrag_neu:     c.beitrag_neu     ?? '',
-      absicherung_neu: c.absicherung_neu || '',
     })
     setEditState({ cat, contractId: c.id })
   }
@@ -68,8 +65,6 @@ export default function VertraegeTab({ contracts, setContracts, customerId }) {
         ablaufdatum:     form.ablaufdatum,
         beitrag_alt:     form.beitrag_alt !== '' ? Number(form.beitrag_alt) : null,
         absicherung_alt: form.absicherung_alt,
-        beitrag_neu:     form.beitrag_neu !== '' ? Number(form.beitrag_neu) : null,
-        absicherung_neu: form.absicherung_neu,
       }
       const { cat, contractId } = editState
       if (contractId === null) {
@@ -136,8 +131,8 @@ export default function VertraegeTab({ contracts, setContracts, customerId }) {
                     <div style={{ fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                       {c.gesellschaft || c.police_nr || '(kein Name)'}
                     </div>
-                    {fmtEuro(c.beitrag_neu) && (
-                      <div style={{ color: 'var(--green)', fontWeight: 700 }}>Neu: {fmtEuro(c.beitrag_neu)}</div>
+                    {fmtEuro(c.beitrag_alt) && (
+                      <div style={{ color: 'var(--muted)', fontSize: 10 }}>{fmtEuro(c.beitrag_alt)}/Monat</div>
                     )}
                   </div>
                   <button type="button" onClick={() => openEdit(key, c)}
@@ -205,21 +200,6 @@ export default function VertraegeTab({ contracts, setContracts, customerId }) {
                   <label className="form-label">Absicherung alt</label>
                   <input className="form-input" value={form.absicherung_alt}
                     onChange={e => setForm(f => ({ ...f, absicherung_alt: e.target.value }))} />
-                </div>
-              </div>
-              <div className="divider" />
-              <div style={{ fontSize: 10, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.1em', color: 'var(--muted)', marginBottom: 10 }}>Neuer Vertrag</div>
-              <div className="grid-2">
-                <div className="form-group">
-                  <label className="form-label">Beitrag neu (€/Monat)</label>
-                  <input className="form-input" type="number" step="0.01" min="0"
-                    value={form.beitrag_neu}
-                    onChange={e => setForm(f => ({ ...f, beitrag_neu: e.target.value }))} placeholder="0,00" />
-                </div>
-                <div className="form-group">
-                  <label className="form-label">Absicherung neu</label>
-                  <input className="form-input" value={form.absicherung_neu}
-                    onChange={e => setForm(f => ({ ...f, absicherung_neu: e.target.value }))} />
                 </div>
               </div>
             </div>
