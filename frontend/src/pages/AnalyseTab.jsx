@@ -169,23 +169,28 @@ export default function AnalyseTab({ cats: catsProp, contracts, recommendations,
 
   return (
     <>
+      {/* ── Toolbar ── */}
+      <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 6 }}>
+        <button type="button" className="btn btn-ghost btn-sm"
+          onClick={() => setExpanded(Object.fromEntries(Object.keys(KATEGORIE_META).map(k => [k, false])))}>
+          Alle schließen
+        </button>
+      </div>
+
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
         {Object.entries(KATEGORIE_META).map(([key, m]) => {
           const catData    = localCats[key] || {}
           const gStatus    = catData.status || 'nicht_besprochen'
-          const gStyle     = gespraechStyle(gStatus)
           const bestand    = (contracts[key] || []).filter(hasDaten)
           const recs       = recommendations[key] || []
           const open       = isExpanded(key)
 
-          // Delta: Summe Bestand beitrag_alt vs. jede Option
           const bestandTotal = bestand.reduce((s, c) => s + (Number(c.beitrag_alt) || 0), 0)
 
           return (
             <div key={key} style={{
               background: 'var(--white)',
-              border: `1px solid ${gStyle.border}`,
-              borderLeft: `3px solid ${gStyle.border}`,
+              border: '1px solid var(--line)',
               borderRadius: 10,
             }}>
               {/* ── Header ── */}
@@ -194,10 +199,22 @@ export default function AnalyseTab({ cats: catsProp, contracts, recommendations,
                 padding: '10px 14px', cursor: 'pointer',
               }} onClick={() => toggleExpand(key)}>
                 <span style={{ fontSize: 18 }}>{m.icon}</span>
-                <span style={{ fontWeight: 700, fontSize: 14, flex: 1 }}>{m.label}</span>
+                <span style={{ fontWeight: 700, fontSize: 14 }}>{m.label}</span>
+
+                {/* Bestand-Badge direkt nach Kategorie */}
+                {bestand.length > 0 && (
+                  <span style={{ fontSize: 11, color: 'var(--muted)', background: 'var(--section-bg)', padding: '2px 7px', borderRadius: 10 }}>
+                    {bestand.length} Bestand
+                  </span>
+                )}
+                {recs.length > 0 && (
+                  <span style={{ fontSize: 11, color: 'var(--accent)', background: 'var(--section-bg)', padding: '2px 7px', borderRadius: 10 }}>
+                    {recs.filter(r => r.status === 'angenommen').length}/{recs.length} angenommen
+                  </span>
+                )}
 
                 {/* Gesprächsstatus Pills */}
-                <div style={{ display: 'flex', gap: 4 }} onClick={e => e.stopPropagation()}>
+                <div style={{ display: 'flex', gap: 4, marginLeft: 'auto' }} onClick={e => e.stopPropagation()}>
                   {GESPRAECH_STATUS.map(gs => (
                     <button key={gs.value} type="button"
                       onClick={() => updateGespraechStatus(key, gs.value)}
@@ -212,18 +229,6 @@ export default function AnalyseTab({ cats: catsProp, contracts, recommendations,
                     </button>
                   ))}
                 </div>
-
-                {/* Kennzahlen */}
-                {bestand.length > 0 && (
-                  <span style={{ fontSize: 11, color: 'var(--muted)', marginLeft: 4 }}>
-                    {bestand.length} Bestand
-                  </span>
-                )}
-                {recs.length > 0 && (
-                  <span style={{ fontSize: 11, color: 'var(--accent)', marginLeft: 4 }}>
-                    {recs.filter(r => r.status === 'angenommen').length}/{recs.length} angenommen
-                  </span>
-                )}
 
                 <span style={{ fontSize: 11, color: 'var(--muted)', marginLeft: 6 }}>{open ? '▲' : '▼'}</span>
               </div>
