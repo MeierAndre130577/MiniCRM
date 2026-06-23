@@ -387,7 +387,7 @@ function filledCount(fields, form, prefix) {
   }).length
 }
 
-function PersonForm({ prefix, title, defaultOpen = true, form, set, extraTabs = [] }) {
+function PersonForm({ prefix, title, defaultOpen = true, form, set, extraTabs = [], onRemove }) {
   const [open, setOpen]     = useState(defaultOpen)
   const [activeTab, setTab] = useState('Person')
   const g = (k) => form[`${prefix}_${k}`]
@@ -417,7 +417,19 @@ function PersonForm({ prefix, title, defaultOpen = true, form, set, extraTabs = 
         borderBottom: open ? '1px solid var(--line)' : 'none',
       }}>
         <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--text)' }}>{title}</span>
-        <span style={{ fontSize: 11, color: 'var(--muted)', transform: open ? 'rotate(180deg)' : 'none', transition: 'transform .2s' }}>▼</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          {onRemove && (
+            <button type="button" onClick={e => { e.stopPropagation(); if (confirm('2. Person entfernen?')) onRemove() }}
+              style={{
+                fontSize: 11, padding: '2px 10px', borderRadius: 10, cursor: 'pointer',
+                border: '1px solid var(--red)', background: 'transparent', color: 'var(--red)',
+                fontWeight: 600, lineHeight: 1.4,
+              }}>
+              Entfernen
+            </button>
+          )}
+          <span style={{ fontSize: 11, color: 'var(--muted)', transform: open ? 'rotate(180deg)' : 'none', transition: 'transform .2s' }}>▼</span>
+        </div>
       </div>
 
       {open && (
@@ -888,7 +900,12 @@ function StammdatenTab({ kunde, saveAll }) {
             },
           ]} />
           {showP2
-            ? <PersonForm prefix="p2" title={p2Title} defaultOpen={true} form={form} set={set} />
+            ? <PersonForm prefix="p2" title={p2Title} defaultOpen={true} form={form} set={set}
+                onRemove={() => {
+                  const p2Fields = ['anrede','vorname','nachname','geburtsdatum','familienstand','raucher','hobby','haustiere','email','handy','festnetz','strasse','plz','ort','beruf','abschluss','arbeitsverhaeltnis','arbeitgeber','gehalt_netto','gehalt_brutto','gkv_anbieter','gkv_stand','iban']
+                  p2Fields.forEach(k => set(`p2_${k}`, null))
+                  setShowP2(false)
+                }} />
             : (
               <button type="button" onClick={() => setShowP2(true)} style={{
                 display: 'flex', alignItems: 'center', gap: 8,
