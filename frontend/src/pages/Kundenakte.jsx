@@ -114,7 +114,7 @@ export default function Kundenakte() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const tab = searchParams.get('tab') || 'uebersicht'
-  const FORM_TABS = ['stammdaten', 'ansprechpartner']
+  const FORM_TABS = ['stammdaten']
   const activeFormId = FORM_TABS.includes(tab) ? `form-${tab}` : null
   const [kunde, setKunde]           = useState(null)
   const [saving, setSaving]         = useState(false)
@@ -277,11 +277,6 @@ export default function Kundenakte() {
           setRecommendations={setRecommendations}
           customerId={Number(id)}
         />
-      )}
-
-      {/* ── Ansprechpartner Scores ── */}
-      {tab === 'ansprechpartner' && (
-        <ApScoresTab apScores={apScores} saveAll={saveAll} kunde={kunde} />
       )}
 
       {/* ── Termine ── */}
@@ -825,6 +820,72 @@ function StammdatenTab({ kunde, saveAll }) {
                 </Field>
               ),
             },
+            {
+              label: 'Ansprechpartner',
+              fields: [],
+              content: (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                  <div style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.08em', color: 'var(--muted)' }}>
+                    Bewertung je Bereich (0–10)
+                  </div>
+                  {AP_BEREICHE.map(b => {
+                    const ap = form.ap_scores || {}
+                    const setAp = (key, val) => set('ap_scores', { ...ap, [key]: val })
+                    return (
+                      <div key={b.key}>
+                        <div style={{ fontWeight: 700, fontSize: 13, marginBottom: 8 }}>{b.label}</div>
+                        <div className="grid-3">
+                          <Field label="Wichtigkeit (0–10)">
+                            <input type="number" min={0} max={10} className="form-input"
+                              value={ap[`${b.key}_wichtigkeit`] ?? ''}
+                              onChange={e => setAp(`${b.key}_wichtigkeit`, e.target.value === '' ? null : Number(e.target.value))} />
+                          </Field>
+                          <Field label="Ansprechpartner vorhanden">
+                            <select className="form-select"
+                              value={ap[`${b.key}_vorhanden`] ?? ''}
+                              onChange={e => setAp(`${b.key}_vorhanden`, e.target.value)}>
+                              <option value="">—</option>
+                              <option value="ja">Ja</option>
+                              <option value="nein">Nein</option>
+                            </select>
+                          </Field>
+                          <Field label="Zufriedenheit (0–10)">
+                            <input type="number" min={0} max={10} className="form-input"
+                              value={ap[`${b.key}_zufriedenheit`] ?? ''}
+                              onChange={e => setAp(`${b.key}_zufriedenheit`, e.target.value === '' ? null : Number(e.target.value))} />
+                          </Field>
+                        </div>
+                        <div className="divider" style={{ marginTop: 12 }} />
+                      </div>
+                    )
+                  })}
+                  <div className="grid-2">
+                    <Field label="Qualität der Absicherung">
+                      <select className="form-select"
+                        value={(form.ap_scores || {}).qualitaet_absicherung || ''}
+                        onChange={e => set('ap_scores', { ...(form.ap_scores || {}), qualitaet_absicherung: e.target.value })}>
+                        <option value="">—</option>
+                        <option>grobe Absicherung</option>
+                        <option>sehr gut abgesichert</option>
+                        <option>max. Absicherung</option>
+                      </select>
+                    </Field>
+                    <Field label="Höhe der Selbstbeteiligung">
+                      <select className="form-select"
+                        value={(form.ap_scores || {}).selbstbeteiligung || ''}
+                        onChange={e => set('ap_scores', { ...(form.ap_scores || {}), selbstbeteiligung: e.target.value })}>
+                        <option value="">—</option>
+                        <option>keine (außer RS)</option>
+                        <option>150 €</option>
+                        <option>250 €</option>
+                        <option>500 €</option>
+                        <option>1.000 €</option>
+                      </select>
+                    </Field>
+                  </div>
+                </div>
+              ),
+            },
           ]} />
           {showP2
             ? <PersonForm prefix="p2" title={p2Title} defaultOpen={true} form={form} set={set} />
@@ -847,76 +908,6 @@ function StammdatenTab({ kunde, saveAll }) {
 }
 
 // ── Ansprechpartner Tab ────────────────────────────────────────────────────────
-function ApScoresTab({ apScores, saveAll, kunde }) {
-  const [scores, setScores] = useState(apScores)
-
-  async function handleSave(e) {
-    e.preventDefault()
-    await saveAll({ ...toForm(kunde), ap_scores: scores })
-  }
-
-  return (
-    <form id="form-ansprechpartner" onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-      <div className="card">
-        <div className="section-label" style={{ marginBottom: 16 }}>Bewertung je Bereich (0–10)</div>
-        {AP_BEREICHE.map(b => (
-          <div key={b.key} style={{ marginBottom: 20 }}>
-            <div style={{ fontWeight: 700, fontSize: 13, marginBottom: 8 }}>{b.label}</div>
-            <div className="grid-3">
-              <Field label="Wichtigkeit (0–10)">
-                <input type="number" min={0} max={10} className="form-input"
-                  value={scores[`${b.key}_wichtigkeit`] ?? ''}
-                  onChange={e => setScores(s => ({ ...s, [`${b.key}_wichtigkeit`]: e.target.value === '' ? null : Number(e.target.value) }))} />
-              </Field>
-              <Field label="Ansprechpartner vorhanden">
-                <select className="form-select"
-                  value={scores[`${b.key}_vorhanden`] ?? ''}
-                  onChange={e => setScores(s => ({ ...s, [`${b.key}_vorhanden`]: e.target.value }))}>
-                  <option value="">—</option>
-                  <option value="ja">Ja</option>
-                  <option value="nein">Nein</option>
-                </select>
-              </Field>
-              <Field label="Zufriedenheit (0–10)">
-                <input type="number" min={0} max={10} className="form-input"
-                  value={scores[`${b.key}_zufriedenheit`] ?? ''}
-                  onChange={e => setScores(s => ({ ...s, [`${b.key}_zufriedenheit`]: e.target.value === '' ? null : Number(e.target.value) }))} />
-              </Field>
-            </div>
-            <div className="divider" style={{ marginTop: 16 }} />
-          </div>
-        ))}
-
-        <div className="grid-2">
-          <Field label="Qualität der Absicherung">
-            <select className="form-select"
-              value={scores.qualitaet_absicherung || ''}
-              onChange={e => setScores(s => ({ ...s, qualitaet_absicherung: e.target.value }))}>
-              <option value="">—</option>
-              <option>grobe Absicherung</option>
-              <option>sehr gut abgesichert</option>
-              <option>max. Absicherung</option>
-            </select>
-          </Field>
-          <Field label="Höhe der Selbstbeteiligung">
-            <select className="form-select"
-              value={scores.selbstbeteiligung || ''}
-              onChange={e => setScores(s => ({ ...s, selbstbeteiligung: e.target.value }))}>
-              <option value="">—</option>
-              <option>keine (außer RS)</option>
-              <option>150 €</option>
-              <option>250 €</option>
-              <option>500 €</option>
-              <option>1.000 €</option>
-            </select>
-          </Field>
-        </div>
-      </div>
-
-    </form>
-  )
-}
-
 // ── Termine Tab ────────────────────────────────────────────────────────────────
 const TV_STATUS_COLORS = {
   'Neuer Lead':                 { bg: '#eff6ff', color: '#2563eb', border: '#bfdbfe' },

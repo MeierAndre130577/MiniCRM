@@ -12,7 +12,6 @@ const KUNDE_TABS = [
   { key: 'uebersicht',      icon: '📋', label: 'Übersicht' },
   { key: 'stammdaten',      icon: '👤', label: 'Stammdaten' },
   { key: 'analyse',         icon: '📊', label: 'Analyse' },
-  { key: 'ansprechpartner', icon: '🤝', label: 'Ansprechpartner' },
   { key: 'termine',         icon: '📅', label: 'Termine' },
   { key: 'vertraege',       icon: '📄', label: 'Verträge' },
 ]
