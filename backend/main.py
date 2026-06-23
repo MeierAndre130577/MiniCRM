@@ -333,6 +333,76 @@ class ContractUpsert(BaseModel):
     absicherung_neu: Optional[str]   = ""
 
 
+# ── Recommendations ──────────────────────────────────────────────────────────
+
+class RecommendationUpsert(BaseModel):
+    bezeichnung: str = ''
+    gesellschaft: str = ''
+    beitrag: Optional[float] = None
+    leistung: str = ''
+    begruendung: str = ''
+    status: str = 'offen'
+
+
+@app.get("/api/customers/{customer_id}/recommendations")
+def get_recommendations(customer_id: int):
+    with db() as conn:
+        rows = conn.execute(
+            "SELECT * FROM recommendation_options WHERE customer_id = %s ORDER BY id",
+            (customer_id,)
+        ).fetchall()
+        result = {cat: [] for cat in CATEGORIES}
+        for r in rows:
+            cat = r["category"]
+            if cat in result:
+                result[cat].append(dict(r))
+        return result
+
+
+@app.post("/api/customers/{customer_id}/recommendations/{category}", status_code=201)
+def create_recommendation(customer_id: int, category: str, data: RecommendationUpsert):
+    if category not in CATEGORIES:
+        raise HTTPException(400, f"Unbekannte Kategorie: {category}")
+    with db() as conn:
+        cur = conn.execute("""
+            INSERT INTO recommendation_options
+                (customer_id, category, bezeichnung, gesellschaft, beitrag, leistung, begruendung, status, updated_at)
+            VALUES (%s,%s,%s,%s,%s,%s,%s,%s,NOW()) RETURNING id
+        """, (customer_id, category, data.bezeichnung, data.gesellschaft,
+              data.beitrag, data.leistung, data.begruendung, data.status))
+        new_id = cur.fetchone()["id"]
+        return dict(conn.execute(
+            "SELECT * FROM recommendation_options WHERE id = %s", (new_id,)
+        ).fetchone())
+
+
+@app.put("/api/customers/{customer_id}/recommendations/{rec_id}")
+def update_recommendation(customer_id: int, rec_id: int, data: RecommendationUpsert):
+    with db() as conn:
+        conn.execute("""
+            UPDATE recommendation_options
+            SET bezeichnung=%s, gesellschaft=%s, beitrag=%s, leistung=%s,
+                begruendung=%s, status=%s, updated_at=NOW()
+            WHERE id=%s AND customer_id=%s
+        """, (data.bezeichnung, data.gesellschaft, data.beitrag, data.leistung,
+              data.begruendung, data.status, rec_id, customer_id))
+        row = conn.execute(
+            "SELECT * FROM recommendation_options WHERE id=%s", (rec_id,)
+        ).fetchone()
+        if not row:
+            raise HTTPException(404, "Empfehlung nicht gefunden")
+        return dict(row)
+
+
+@app.delete("/api/customers/{customer_id}/recommendations/{rec_id}", status_code=204)
+def delete_recommendation(customer_id: int, rec_id: int):
+    with db() as conn:
+        conn.execute(
+            "DELETE FROM recommendation_options WHERE id=%s AND customer_id=%s",
+            (rec_id, customer_id)
+        )
+
+
 @app.get("/api/customers/{customer_id}/contracts")
 def get_contracts(customer_id: int):
     with db() as conn:

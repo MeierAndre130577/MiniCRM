@@ -98,7 +98,7 @@ function PersonCard({ k, prefix, id }) {
   )
 }
 
-export default function UebersichtKomplett({ kunde, cats, contracts, id }) {
+export default function UebersichtKomplett({ kunde, cats, contracts, recommendations = {}, id }) {
   const navigate = useNavigate()
   const appts = kunde.appointments || []
   const filledContracts = Object.entries(KATEGORIE_META).flatMap(([k, m]) =>
@@ -106,6 +106,15 @@ export default function UebersichtKomplett({ kunde, cats, contracts, id }) {
       .filter(c => c.gesellschaft || c.police_nr || c.beitrag_alt || c.beitrag_neu)
       .map(c => ({ ...c, _key: k, _meta: m }))
   )
+
+  const allRecs = Object.values(recommendations).flat()
+  const recCounts = {
+    total:       allRecs.length,
+    offen:       allRecs.filter(r => r.status === 'offen').length,
+    praesentiert:allRecs.filter(r => r.status === 'praesentiert').length,
+    angenommen:  allRecs.filter(r => r.status === 'angenommen').length,
+    abgelehnt:   allRecs.filter(r => r.status === 'abgelehnt').length,
+  }
 
   const einnahmen = (Number(kunde.hhr_einnahmen_gehalt) || 0)
     + (Number(kunde.hhr_einnahmen_zuschuesse) || 0)
@@ -150,9 +159,9 @@ export default function UebersichtKomplett({ kunde, cats, contracts, id }) {
         )}
       </div>
 
-      {/* ── Kategorien ── */}
+      {/* ── Kategorien & Analyse ── */}
       <div>
-        <SectionHeader title="Kategorien" tab="kategorien" id={id} />
+        <SectionHeader title="Kategorien" tab="analyse" id={id} />
         <div className="card" style={{ padding: '12px 14px' }}>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 6 }}>
             {Object.entries(KATEGORIE_META).map(([key, meta]) => {
@@ -160,7 +169,7 @@ export default function UebersichtKomplett({ kunde, cats, contracts, id }) {
               const { bg, color, border } = statusColor(status)
               const notizen = (cats[key] || {}).notizen
               return (
-                <div key={key} onClick={() => navigate(`/kunden/${id}?tab=kategorien`)}
+                <div key={key} onClick={() => navigate(`/kunden/${id}?tab=analyse`)}
                   title={notizen || undefined}
                   style={{
                     display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4,
@@ -177,6 +186,45 @@ export default function UebersichtKomplett({ kunde, cats, contracts, id }) {
           </div>
         </div>
       </div>
+
+      {/* ── Empfehlungen KPIs ── */}
+      {recCounts.total > 0 && (
+        <div>
+          <SectionHeader title="Empfehlungen" tab="analyse" id={id} />
+          <div className="card" style={{ padding: '12px 14px' }}>
+            <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+              <div style={{ textAlign: 'center', flex: 1 }}>
+                <div style={{ fontSize: 22, fontWeight: 800 }}>{recCounts.total}</div>
+                <div style={{ fontSize: 11, color: 'var(--muted)' }}>Gesamt</div>
+              </div>
+              {recCounts.offen > 0 && (
+                <div style={{ textAlign: 'center', flex: 1 }}>
+                  <div style={{ fontSize: 22, fontWeight: 800, color: 'var(--muted)' }}>{recCounts.offen}</div>
+                  <div style={{ fontSize: 11, color: 'var(--muted)' }}>Offen</div>
+                </div>
+              )}
+              {recCounts.praesentiert > 0 && (
+                <div style={{ textAlign: 'center', flex: 1 }}>
+                  <div style={{ fontSize: 22, fontWeight: 800, color: 'var(--status-td-c)' }}>{recCounts.praesentiert}</div>
+                  <div style={{ fontSize: 11, color: 'var(--muted)' }}>Präsentiert</div>
+                </div>
+              )}
+              {recCounts.angenommen > 0 && (
+                <div style={{ textAlign: 'center', flex: 1 }}>
+                  <div style={{ fontSize: 22, fontWeight: 800, color: 'var(--status-fu-c)' }}>{recCounts.angenommen}</div>
+                  <div style={{ fontSize: 11, color: 'var(--muted)' }}>Angenommen</div>
+                </div>
+              )}
+              {recCounts.abgelehnt > 0 && (
+                <div style={{ textAlign: 'center', flex: 1 }}>
+                  <div style={{ fontSize: 22, fontWeight: 800, color: 'var(--status-ov-c)' }}>{recCounts.abgelehnt}</div>
+                  <div style={{ fontSize: 11, color: 'var(--muted)' }}>Abgelehnt</div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ── Budget ── */}
       {hasBudget && (

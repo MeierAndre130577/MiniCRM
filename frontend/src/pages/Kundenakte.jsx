@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom'
 import { customers, tasks } from '../lib/api'
 import VertraegeTab from './VertraegeTab'
+import AnalyseTab from './AnalyseTab'
 import UebersichtKomplett from './UebersichtKomplett'
 import AddressAutocomplete, { validateAddress } from '../components/AddressAutocomplete'
 
@@ -91,9 +92,10 @@ export default function Kundenakte() {
   const [katModal, setKatModal]     = useState(null)
   const [apptForm, setApptForm]     = useState({ datum: '', status: '', notizen: '' })
   const [showAppt, setShowAppt]     = useState(false)
-  const [contracts, setContracts]   = useState({})
-  const [tvStatus, setTvStatus]         = useState([])
-  const [leadMapping, setLeadMapping]   = useState({})
+  const [contracts, setContracts]             = useState({})
+  const [recommendations, setRecommendations] = useState({})
+  const [tvStatus, setTvStatus]               = useState([])
+  const [leadMapping, setLeadMapping]         = useState({})
 
   const load = useCallback(async () => {
     try { setKunde(await customers.get(Number(id))) } catch { navigate('/kunden') }
@@ -104,6 +106,9 @@ export default function Kundenakte() {
   useEffect(() => {
     customers.getContracts(Number(id))
       .then(map => setContracts(map || {}))
+      .catch(() => {})
+    customers.getRecommendations(Number(id))
+      .then(map => setRecommendations(map || {}))
       .catch(() => {})
   }, [id])
 
@@ -221,6 +226,7 @@ export default function Kundenakte() {
           kunde={kunde}
           cats={cats}
           contracts={contracts}
+          recommendations={recommendations}
           id={id}
         />
       )}
@@ -230,9 +236,16 @@ export default function Kundenakte() {
         <StammdatenTab kunde={kunde} saveAll={saveAll} />
       )}
 
-      {/* ── Kategorien ── */}
-      {tab === 'kategorien' && (
-        <KategorienSwipe cats={cats} anfragKats={anfragKats} contracts={contracts} setContracts={setContracts} customerId={Number(id)} onSaved={load} />
+      {/* ── Analyse ── */}
+      {tab === 'analyse' && (
+        <AnalyseTab
+          cats={cats}
+          contracts={contracts}
+          recommendations={recommendations}
+          setRecommendations={setRecommendations}
+          customerId={Number(id)}
+          onCatUpdated={load}
+        />
       )}
 
       {/* ── Ansprechpartner Scores ── */}

@@ -11,7 +11,7 @@ import { tasks } from './lib/api'
 const KUNDE_TABS = [
   { key: 'uebersicht',      icon: '📋', label: 'Übersicht' },
   { key: 'stammdaten',      icon: '👤', label: 'Stammdaten' },
-  { key: 'kategorien',      icon: '🗂️', label: 'Kategorien' },
+  { key: 'analyse',         icon: '📊', label: 'Analyse' },
   { key: 'ansprechpartner', icon: '🤝', label: 'Ansprechpartner' },
   { key: 'budget',          icon: '💰', label: 'Budget' },
   { key: 'termine',         icon: '📅', label: 'Termine' },

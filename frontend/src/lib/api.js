@@ -33,6 +33,14 @@ export const customers = {
   deleteContract: (id, contractId) =>
     request('DELETE', `/customers/${id}/contracts/${contractId}`),
   exportExcelUrl: (id) => `${BASE}/customers/${id}/export/excel`,
+  getRecommendations: (id) =>
+    request('GET', `/customers/${id}/recommendations`),
+  createRecommendation: (id, cat, data) =>
+    request('POST', `/customers/${id}/recommendations/${cat}`, data),
+  updateRecommendation: (id, recId, data) =>
+    request('PUT', `/customers/${id}/recommendations/${recId}`, data),
+  deleteRecommendation: (id, recId) =>
+    request('DELETE', `/customers/${id}/recommendations/${recId}`),
 }
 
 export const settings = {

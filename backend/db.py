@@ -196,6 +196,20 @@ _TABLES = [
         updated_at      TIMESTAMPTZ DEFAULT NOW()
     )
     """,
+    """
+    CREATE TABLE IF NOT EXISTS recommendation_options (
+        id              SERIAL PRIMARY KEY,
+        customer_id     INTEGER NOT NULL REFERENCES customers(id) ON DELETE CASCADE,
+        category        TEXT NOT NULL,
+        bezeichnung     TEXT DEFAULT '',
+        gesellschaft    TEXT DEFAULT '',
+        beitrag         DOUBLE PRECISION,
+        leistung        TEXT DEFAULT '',
+        begruendung     TEXT DEFAULT '',
+        status          TEXT DEFAULT 'offen',
+        updated_at      TIMESTAMPTZ DEFAULT NOW()
+    )
+    """,
 ]
 
 
