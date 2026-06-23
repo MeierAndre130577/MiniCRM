@@ -80,6 +80,35 @@ function Field({ label, children }) {
   )
 }
 
+function FieldWithNone({ label, value, onChange, children }) {
+  const isNone = value === 'Keine'
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+        <div className="form-label" style={{ flex: 1 }}>{label}</div>
+        <button type="button" onClick={() => onChange(isNone ? '' : 'Keine')}
+          style={{
+            fontSize: 10, padding: '1px 7px', borderRadius: 10, cursor: 'pointer',
+            border: `1px solid ${isNone ? 'var(--status-fu-b)' : 'var(--line)'}`,
+            background: isNone ? 'var(--status-fu-bg)' : 'transparent',
+            color: isNone ? 'var(--status-fu-c)' : 'var(--muted)',
+            fontWeight: isNone ? 700 : 400, lineHeight: 1.4,
+          }}>
+          {isNone ? '✓ Keine' : 'Keine'}
+        </button>
+      </div>
+      {!isNone && children}
+      {isNone && (
+        <div style={{
+          background: 'var(--status-fu-bg)', border: '1px solid var(--status-fu-b)',
+          borderRadius: 6, padding: '6px 10px', fontSize: 13, color: 'var(--status-fu-c)',
+          fontStyle: 'italic',
+        }}>Keine</div>
+      )}
+    </div>
+  )
+}
+
 export default function Kundenakte() {
   const { id } = useParams()
   const navigate = useNavigate()
@@ -444,12 +473,12 @@ function PersonForm({ prefix, title, defaultOpen = true, form, set }) {
                   <option value={0}>Nein</option><option value={1}>Ja</option>
                 </select>
               </Field>
-              <Field label="Hobby">
+              <FieldWithNone label="Hobby" value={g('hobby') || ''} onChange={v => set(`${prefix}_hobby`, v)}>
                 <input className="form-input" style={fb('hobby')} value={g('hobby') || ''} onChange={s('hobby')} />
-              </Field>
-              <Field label="Haustiere">
+              </FieldWithNone>
+              <FieldWithNone label="Haustiere" value={g('haustiere') || ''} onChange={v => set(`${prefix}_haustiere`, v)}>
                 <input className="form-input" style={fb('haustiere')} value={g('haustiere') || ''} onChange={s('haustiere')} />
-              </Field>
+              </FieldWithNone>
             </div>
           )}
 
@@ -462,9 +491,9 @@ function PersonForm({ prefix, title, defaultOpen = true, form, set }) {
               <Field label="Handy">
                 <input className="form-input" style={fb('handy')} value={g('handy') || ''} onChange={s('handy')} />
               </Field>
-              <Field label="Festnetz">
+              <FieldWithNone label="Festnetz" value={g('festnetz') || ''} onChange={v => set(`${prefix}_festnetz`, v)}>
                 <input className="form-input" style={fb('festnetz')} value={g('festnetz') || ''} onChange={s('festnetz')} />
-              </Field>
+              </FieldWithNone>
             </div>
           )}
 
