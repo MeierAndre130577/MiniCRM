@@ -191,13 +191,13 @@ export default function VertraegeTab({ contracts, setContracts, customerId }) {
               <div style={{ fontSize: 10, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.1em', color: 'var(--muted)', marginBottom: 10 }}>Bestandsvertrag</div>
               <div className="grid-2">
                 <div className="form-group">
-                  <label className="form-label">Beitrag alt (€/Monat)</label>
+                  <label className="form-label">Beitrag (€/Monat)</label>
                   <input className="form-input" type="number" step="0.01" min="0"
                     value={form.beitrag_alt}
                     onChange={e => setForm(f => ({ ...f, beitrag_alt: e.target.value }))} placeholder="0,00" />
                 </div>
                 <div className="form-group">
-                  <label className="form-label">Absicherung alt</label>
+                  <label className="form-label">Absicherung</label>
                   <input className="form-input" value={form.absicherung_alt}
                     onChange={e => setForm(f => ({ ...f, absicherung_alt: e.target.value }))} />
                 </div>
