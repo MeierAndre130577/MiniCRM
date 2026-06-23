@@ -392,7 +392,7 @@ function filledCount(fields, form, prefix) {
   }).length
 }
 
-function PersonForm({ prefix, title, defaultOpen = true, form, set }) {
+function PersonForm({ prefix, title, defaultOpen = true, form, set, extraTabs = [] }) {
   const [open, setOpen]     = useState(defaultOpen)
   const [activeTab, setTab] = useState('Person')
   const g = (k) => form[`${prefix}_${k}`]
@@ -411,6 +411,8 @@ function PersonForm({ prefix, title, defaultOpen = true, form, set }) {
     Beruf:   ['beruf','abschluss','arbeitsverhaeltnis','arbeitgeber','gehalt_netto','gehalt_brutto','gkv_anbieter','gkv_stand','iban'],
   }
 
+  const allTabs = [...PERSON_TABS, ...extraTabs.map(e => e.label)]
+
   return (
     <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
       {/* ── Kopfzeile ── */}
@@ -426,11 +428,15 @@ function PersonForm({ prefix, title, defaultOpen = true, form, set }) {
       {open && (
         <div style={{ padding: '12px 16px 16px' }}>
           {/* ── Tab-Leiste ── */}
-          <div style={{ display: 'flex', gap: 4, marginBottom: 14, borderBottom: '1px solid var(--line)', paddingBottom: 10 }}>
-            {PERSON_TABS.map(t => {
-              const total  = TAB_FIELDS[t].length
-              const count  = filledCount(TAB_FIELDS[t], form, prefix)
-              const full   = count === total
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginBottom: 14, borderBottom: '1px solid var(--line)', paddingBottom: 10 }}>
+            {allTabs.map(t => {
+              const isExtra = !TAB_FIELDS[t]
+              const extraDef = extraTabs.find(e => e.label === t)
+              const total  = isExtra ? (extraDef?.fields?.length || 0) : TAB_FIELDS[t].length
+              const count  = isExtra
+                ? (extraDef?.fields || []).filter(k => { const v = form[k]; return v !== null && v !== undefined && v !== '' }).length
+                : filledCount(TAB_FIELDS[t], form, prefix)
+              const full   = total > 0 && count === total
               const active = activeTab === t
               return (
                 <button key={t} type="button" onClick={() => setTab(t)}
@@ -579,6 +585,11 @@ function PersonForm({ prefix, title, defaultOpen = true, form, set }) {
               </Field>
             </div>
           )}
+
+          {/* ── Extra Tabs ── */}
+          {extraTabs.map(et => activeTab === et.label && (
+            <div key={et.label}>{et.content}</div>
+          ))}
         </div>
       )}
     </div>
@@ -698,7 +709,123 @@ function StammdatenTab({ kunde, saveAll }) {
           <span style={{ fontSize: 11, color: 'var(--muted)' }}>Persönliche Angaben des Kunden</span>
         </div>
         <div className="card" style={{ padding: '14px 16px', borderLeft: '3px solid #16a34a', display: 'flex', flexDirection: 'column', gap: 10 }}>
-          <PersonForm prefix="p1" title={p1Title} defaultOpen={true} form={form} set={set} />
+          <PersonForm prefix="p1" title={p1Title} defaultOpen={true} form={form} set={set} extraTabs={[
+            {
+              label: 'Budget NT',
+              fields: ['budget_absicherung_monatlich','budget_absicherung_einmalig','budget_ansparung_monatlich','budget_ansparung_einmalig','budget_notizen'],
+              content: (
+                <div className="grid-2">
+                  <Field label="Absicherung monatlich (€)">
+                    <input type="number" className="form-input" value={form.budget_absicherung_monatlich || ''}
+                      onChange={e => set('budget_absicherung_monatlich', e.target.value ? Number(e.target.value) : null)} />
+                  </Field>
+                  <Field label="Absicherung einmalig (€)">
+                    <input type="number" className="form-input" value={form.budget_absicherung_einmalig || ''}
+                      onChange={e => set('budget_absicherung_einmalig', e.target.value ? Number(e.target.value) : null)} />
+                  </Field>
+                  <Field label="Ansparung monatlich (€)">
+                    <input type="number" className="form-input" value={form.budget_ansparung_monatlich || ''}
+                      onChange={e => set('budget_ansparung_monatlich', e.target.value ? Number(e.target.value) : null)} />
+                  </Field>
+                  <Field label="Ansparung einmalig (€)">
+                    <input type="number" className="form-input" value={form.budget_ansparung_einmalig || ''}
+                      onChange={e => set('budget_ansparung_einmalig', e.target.value ? Number(e.target.value) : null)} />
+                  </Field>
+                  <div style={{ gridColumn: '1 / -1' }}>
+                    <Field label="Notizen">
+                      <textarea className="form-textarea" value={form.budget_notizen || ''}
+                        onChange={e => set('budget_notizen', e.target.value)} />
+                    </Field>
+                  </div>
+                </div>
+              ),
+            },
+            {
+              label: 'Haushaltsrechner',
+              fields: ['hhr_einnahmen_gehalt','hhr_einnahmen_zuschuesse','hhr_einnahmen_weitere','hhr_ausgaben_gesamt','hhr_freier_betrag','hhr_notizen'],
+              content: (() => {
+                const ein = (Number(form.hhr_einnahmen_gehalt)||0) + (Number(form.hhr_einnahmen_zuschuesse)||0) + (Number(form.hhr_einnahmen_weitere)||0)
+                const frei = form.hhr_freier_betrag || (ein && form.hhr_ausgaben_gesamt ? ein - Number(form.hhr_ausgaben_gesamt) : null)
+                return (
+                  <div className="grid-3">
+                    <Field label="Gehalt gesamt (€)">
+                      <input type="number" className="form-input" value={form.hhr_einnahmen_gehalt || ''}
+                        onChange={e => set('hhr_einnahmen_gehalt', e.target.value ? Number(e.target.value) : null)} />
+                    </Field>
+                    <Field label="Staatl. Zuschüsse (€)">
+                      <input type="number" className="form-input" value={form.hhr_einnahmen_zuschuesse || ''}
+                        onChange={e => set('hhr_einnahmen_zuschuesse', e.target.value ? Number(e.target.value) : null)} />
+                    </Field>
+                    <Field label="Weitere Einnahmen (€)">
+                      <input type="number" className="form-input" value={form.hhr_einnahmen_weitere || ''}
+                        onChange={e => set('hhr_einnahmen_weitere', e.target.value ? Number(e.target.value) : null)} />
+                    </Field>
+                    <Field label="Ausgaben gesamt (€)">
+                      <input type="number" className="form-input" value={form.hhr_ausgaben_gesamt || ''}
+                        onChange={e => set('hhr_ausgaben_gesamt', e.target.value ? Number(e.target.value) : null)} />
+                    </Field>
+                    <Field label="Freier Betrag mtl. (€)">
+                      <input type="number" className="form-input" value={form.hhr_freier_betrag || (frei ?? '')}
+                        onChange={e => set('hhr_freier_betrag', e.target.value ? Number(e.target.value) : null)} />
+                    </Field>
+                    <div style={{ gridColumn: '1 / -1' }}>
+                      <Field label="Notizen">
+                        <textarea className="form-textarea" value={form.hhr_notizen || ''}
+                          onChange={e => set('hhr_notizen', e.target.value)} />
+                      </Field>
+                    </div>
+                  </div>
+                )
+              })(),
+            },
+            {
+              label: 'Empf. & Bew.',
+              fields: ['bewertung_google','bewertung_trustpilot','bewertung_facebook','empfehlung_notizen'],
+              content: (
+                <div className="grid-3">
+                  <Field label="Google (1–5 ★)">
+                    <select className="form-select" value={form.bewertung_google || ''}
+                      onChange={e => set('bewertung_google', e.target.value ? Number(e.target.value) : null)}>
+                      <option value="">—</option>
+                      {[1,2,3,4,5].map(n => <option key={n} value={n}>{'★'.repeat(n)} ({n})</option>)}
+                    </select>
+                  </Field>
+                  <Field label="Trustpilot (1–5 ★)">
+                    <select className="form-select" value={form.bewertung_trustpilot || ''}
+                      onChange={e => set('bewertung_trustpilot', e.target.value ? Number(e.target.value) : null)}>
+                      <option value="">—</option>
+                      {[1,2,3,4,5].map(n => <option key={n} value={n}>{'★'.repeat(n)} ({n})</option>)}
+                    </select>
+                  </Field>
+                  <Field label="Facebook (1–5 ★)">
+                    <select className="form-select" value={form.bewertung_facebook || ''}
+                      onChange={e => set('bewertung_facebook', e.target.value ? Number(e.target.value) : null)}>
+                      <option value="">—</option>
+                      {[1,2,3,4,5].map(n => <option key={n} value={n}>{'★'.repeat(n)} ({n})</option>)}
+                    </select>
+                  </Field>
+                  <div style={{ gridColumn: '1 / -1' }}>
+                    <Field label="Empfehlungsnotizen">
+                      <textarea className="form-textarea" value={form.empfehlung_notizen || ''}
+                        onChange={e => set('empfehlung_notizen', e.target.value)}
+                        placeholder="Empfehlungen, positive Erfahrungen…" />
+                    </Field>
+                  </div>
+                </div>
+              ),
+            },
+            {
+              label: 'Schäden',
+              fields: ['schaeden_notizen'],
+              content: (
+                <Field label="Notizen">
+                  <textarea className="form-textarea" rows={5} value={form.schaeden_notizen || ''}
+                    onChange={e => set('schaeden_notizen', e.target.value)}
+                    placeholder="Bekannte Schäden, Vorerkrankungen…" />
+                </Field>
+              ),
+            },
+          ]} />
           {showP2
             ? <PersonForm prefix="p2" title={p2Title} defaultOpen={true} form={form} set={set} />
             : (
@@ -714,119 +841,6 @@ function StammdatenTab({ kunde, saveAll }) {
           }
         </div>
       </div>
-
-      {/* ── Budget für Neuverträge ── */}
-      <StammdatenSektion label="Budget für Neuverträge" color="#7c3aed">
-        <div className="grid-2">
-          <Field label="Absicherung monatlich (€)">
-            <input type="number" className="form-input" value={form.budget_absicherung_monatlich || ''}
-              onChange={e => set('budget_absicherung_monatlich', e.target.value ? Number(e.target.value) : null)} />
-          </Field>
-          <Field label="Absicherung einmalig (€)">
-            <input type="number" className="form-input" value={form.budget_absicherung_einmalig || ''}
-              onChange={e => set('budget_absicherung_einmalig', e.target.value ? Number(e.target.value) : null)} />
-          </Field>
-          <Field label="Ansparung monatlich (€)">
-            <input type="number" className="form-input" value={form.budget_ansparung_monatlich || ''}
-              onChange={e => set('budget_ansparung_monatlich', e.target.value ? Number(e.target.value) : null)} />
-          </Field>
-          <Field label="Ansparung einmalig (€)">
-            <input type="number" className="form-input" value={form.budget_ansparung_einmalig || ''}
-              onChange={e => set('budget_ansparung_einmalig', e.target.value ? Number(e.target.value) : null)} />
-          </Field>
-          <div style={{ gridColumn: '1 / -1' }}>
-            <Field label="Notizen">
-              <textarea className="form-textarea" value={form.budget_notizen || ''}
-                onChange={e => set('budget_notizen', e.target.value)} />
-            </Field>
-          </div>
-        </div>
-      </StammdatenSektion>
-
-      {/* ── Haushaltsrechner ── */}
-      <StammdatenSektion label="Haushaltsrechner" color="#7c3aed">
-        {(() => {
-          const einnahmen = (Number(form.hhr_einnahmen_gehalt) || 0)
-            + (Number(form.hhr_einnahmen_zuschuesse) || 0)
-            + (Number(form.hhr_einnahmen_weitere) || 0)
-          const frei = form.hhr_freier_betrag
-            || (einnahmen && form.hhr_ausgaben_gesamt ? einnahmen - Number(form.hhr_ausgaben_gesamt) : null)
-          return (
-            <div className="grid-3">
-              <Field label="Gehalt gesamt (€)">
-                <input type="number" className="form-input" value={form.hhr_einnahmen_gehalt || ''}
-                  onChange={e => set('hhr_einnahmen_gehalt', e.target.value ? Number(e.target.value) : null)} />
-              </Field>
-              <Field label="Staatliche Zuschüsse (€)">
-                <input type="number" className="form-input" value={form.hhr_einnahmen_zuschuesse || ''}
-                  onChange={e => set('hhr_einnahmen_zuschuesse', e.target.value ? Number(e.target.value) : null)} />
-              </Field>
-              <Field label="Weitere Einnahmen (€)">
-                <input type="number" className="form-input" value={form.hhr_einnahmen_weitere || ''}
-                  onChange={e => set('hhr_einnahmen_weitere', e.target.value ? Number(e.target.value) : null)} />
-              </Field>
-              <Field label="Ausgaben gesamt (€)">
-                <input type="number" className="form-input" value={form.hhr_ausgaben_gesamt || ''}
-                  onChange={e => set('hhr_ausgaben_gesamt', e.target.value ? Number(e.target.value) : null)} />
-              </Field>
-              <Field label="Freier Betrag mtl. (€)">
-                <input type="number" className="form-input"
-                  value={form.hhr_freier_betrag || (frei ?? '')}
-                  onChange={e => set('hhr_freier_betrag', e.target.value ? Number(e.target.value) : null)} />
-              </Field>
-              <div style={{ gridColumn: '1 / -1' }}>
-                <Field label="Notizen">
-                  <textarea className="form-textarea" value={form.hhr_notizen || ''}
-                    onChange={e => set('hhr_notizen', e.target.value)} />
-                </Field>
-              </div>
-            </div>
-          )
-        })()}
-      </StammdatenSektion>
-
-      {/* ── Empfehlung & Bewertung ── */}
-      <StammdatenSektion label="Empfehlung & Bewertung" color="#b45309">
-        <div className="grid-3">
-          <Field label="Google (Sterne 1–5)">
-            <select className="form-select" value={form.bewertung_google || ''}
-              onChange={e => set('bewertung_google', e.target.value ? Number(e.target.value) : null)}>
-              <option value="">—</option>
-              {[1,2,3,4,5].map(n => <option key={n} value={n}>{'★'.repeat(n)} ({n})</option>)}
-            </select>
-          </Field>
-          <Field label="Trustpilot (1–5)">
-            <select className="form-select" value={form.bewertung_trustpilot || ''}
-              onChange={e => set('bewertung_trustpilot', e.target.value ? Number(e.target.value) : null)}>
-              <option value="">—</option>
-              {[1,2,3,4,5].map(n => <option key={n} value={n}>{'★'.repeat(n)} ({n})</option>)}
-            </select>
-          </Field>
-          <Field label="Facebook (1–5)">
-            <select className="form-select" value={form.bewertung_facebook || ''}
-              onChange={e => set('bewertung_facebook', e.target.value ? Number(e.target.value) : null)}>
-              <option value="">—</option>
-              {[1,2,3,4,5].map(n => <option key={n} value={n}>{'★'.repeat(n)} ({n})</option>)}
-            </select>
-          </Field>
-          <div style={{ gridColumn: '1 / -1' }}>
-            <Field label="Empfehlungsnotizen">
-              <textarea className="form-textarea" value={form.empfehlung_notizen || ''}
-                onChange={e => set('empfehlung_notizen', e.target.value)}
-                placeholder="Empfehlungen, positive Erfahrungen…" />
-            </Field>
-          </div>
-        </div>
-      </StammdatenSektion>
-
-      {/* ── Schäden ── */}
-      <StammdatenSektion label="Schäden" color="#b45309">
-        <Field label="Notizen">
-          <textarea className="form-textarea" rows={5} value={form.schaeden_notizen || ''}
-            onChange={e => set('schaeden_notizen', e.target.value)}
-            placeholder="Bekannte Schäden, Vorerkrankungen…" />
-        </Field>
-      </StammdatenSektion>
 
     </form>
   )
