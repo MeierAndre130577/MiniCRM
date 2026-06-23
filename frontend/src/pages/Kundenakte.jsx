@@ -468,9 +468,12 @@ function PersonForm({ prefix, title, defaultOpen = true, form, set }) {
                 </select>
               </Field>
               <Field label="Raucher">
-                <select className="form-select" style={fb('raucher')} value={g('raucher') ?? 0}
-                  onChange={e => set(`${prefix}_raucher`, Number(e.target.value))}>
-                  <option value={0}>Nein</option><option value={1}>Ja</option>
+                <select className="form-select" style={fb('raucher')}
+                  value={g('raucher') != null ? g('raucher') : ''}
+                  onChange={e => set(`${prefix}_raucher`, e.target.value === '' ? null : Number(e.target.value))}>
+                  <option value="">—</option>
+                  <option value={0}>Nein</option>
+                  <option value={1}>Ja</option>
                 </select>
               </Field>
               <FieldWithNone label="Hobby" value={g('hobby') || ''} onChange={v => set(`${prefix}_hobby`, v)}>
