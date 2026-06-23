@@ -244,7 +244,6 @@ export default function Kundenakte() {
           recommendations={recommendations}
           setRecommendations={setRecommendations}
           customerId={Number(id)}
-          onCatUpdated={load}
         />
       )}
 

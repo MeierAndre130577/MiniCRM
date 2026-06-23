@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { customers } from '../lib/api'
 
 const KATEGORIE_META = {
@@ -52,43 +52,53 @@ function hasDaten(c) {
   return !!(c?.gesellschaft || c?.police_nr || c?.beitrag_alt || c?.beitrag_neu)
 }
 
-export default function AnalyseTab({ cats, contracts, recommendations, setRecommendations, customerId, onCatUpdated }) {
-  const [editState, setEditState] = useState(null) // { cat, recId } — null=closed
-  const [form, setForm]           = useState(EMPTY_FORM)
-  const [saving, setSaving]       = useState(false)
-  const [expanded, setExpanded]   = useState({})
+export default function AnalyseTab({ cats: catsProp, contracts, recommendations, setRecommendations, customerId }) {
+  const [localCats, setLocalCats]  = useState(catsProp)
+  const [editState, setEditState]  = useState(null)
+  const [form, setForm]            = useState(EMPTY_FORM)
+  const [saving, setSaving]        = useState(false)
+  const [expanded, setExpanded]    = useState({})
+
+  // sync wenn von außen neue Daten kommen (z.B. nach load())
+  useEffect(() => { setLocalCats(catsProp) }, [catsProp])
 
   function toggleExpand(key) {
     setExpanded(p => ({ ...p, [key]: !p[key] }))
   }
 
   function isExpanded(key) {
-    // auto-expand if has data
     if (expanded[key] !== undefined) return expanded[key]
-    const hasCat = (cats[key] || {}).status !== 'nicht_besprochen'
+    const hasCat = (localCats[key] || {}).status !== 'nicht_besprochen'
     const hasContracts = (contracts[key] || []).filter(hasDaten).length > 0
     const hasRecs = (recommendations[key] || []).length > 0
     return hasCat || hasContracts || hasRecs
   }
 
-  async function updateGespraechStatus(cat, status) {
-    try {
-      await customers.updateCategory(customerId, cat, {
-        status,
-        notizen: (cats[cat] || {}).notizen || '',
-      })
-      onCatUpdated()
-    } catch (e) { alert(e.message) }
+  function updateGespraechStatus(cat, status) {
+    // optimistisch sofort updaten
+    setLocalCats(p => ({
+      ...p,
+      [cat]: { ...(p[cat] || {}), status },
+    }))
+    // API fire-and-forget
+    customers.updateCategory(customerId, cat, {
+      status,
+      notizen: (localCats[cat] || {}).notizen || '',
+    }).catch(() => {
+      // bei Fehler zurückrollen
+      setLocalCats(p => ({
+        ...p,
+        [cat]: { ...(p[cat] || {}), status: (catsProp[cat] || {}).status || 'nicht_besprochen' },
+      }))
+    })
   }
 
-  async function updateNotizen(cat, notizen) {
-    try {
-      await customers.updateCategory(customerId, cat, {
-        status: (cats[cat] || {}).status || 'nicht_besprochen',
-        notizen,
-      })
-      onCatUpdated()
-    } catch (e) {}
+  function updateNotizen(cat, notizen) {
+    setLocalCats(p => ({ ...p, [cat]: { ...(p[cat] || {}), notizen } }))
+    customers.updateCategory(customerId, cat, {
+      status: (localCats[cat] || {}).status || 'nicht_besprochen',
+      notizen,
+    }).catch(() => {})
   }
 
   function openNew(cat) {
@@ -139,23 +149,29 @@ export default function AnalyseTab({ cats, contracts, recommendations, setRecomm
     } catch (e) { alert(e.message) }
   }
 
-  async function updateRecStatus(cat, recId, status) {
+  function updateRecStatus(cat, recId, status) {
     const rec = (recommendations[cat] || []).find(r => r.id === recId)
     if (!rec) return
-    try {
-      const updated = await customers.updateRecommendation(customerId, recId, { ...rec, status })
+    // optimistisch sofort updaten
+    setRecommendations(p => ({
+      ...p,
+      [cat]: p[cat].map(r => r.id === recId ? { ...r, status } : r),
+    }))
+    // API fire-and-forget
+    customers.updateRecommendation(customerId, recId, { ...rec, status }).catch(() => {
+      // zurückrollen bei Fehler
       setRecommendations(p => ({
         ...p,
-        [cat]: p[cat].map(r => r.id === recId ? updated : r),
+        [cat]: p[cat].map(r => r.id === recId ? { ...r, status: rec.status } : r),
       }))
-    } catch (e) { alert(e.message) }
+    })
   }
 
   return (
     <>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
         {Object.entries(KATEGORIE_META).map(([key, m]) => {
-          const catData    = cats[key] || {}
+          const catData    = localCats[key] || {}
           const gStatus    = catData.status || 'nicht_besprochen'
           const gStyle     = gespraechStyle(gStatus)
           const bestand    = (contracts[key] || []).filter(hasDaten)
